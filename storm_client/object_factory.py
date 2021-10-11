@@ -1,6 +1,15 @@
+#
+# This file is part of SpatioTemporal Open Research Manager.
+# Copyright (C) 2021 INPE.
+#
+# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
+
+"""SpatioTemporal Open Research Manager object factory."""
+
 
 class ObjectFactory:
-
     _factories = {}
 
     @classmethod
@@ -13,4 +22,11 @@ class ObjectFactory:
 
     @classmethod
     def resolve(cls, datatype, data):
-        return cls._factories[datatype](data)
+        if cls.exists(datatype):
+            return cls._factories[datatype](data)
+        raise NotImplemented(f"Factory for {datatype} is not implemented.")
+
+
+__all__ = (
+    "ObjectFactory"
+)

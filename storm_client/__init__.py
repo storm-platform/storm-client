@@ -7,9 +7,9 @@
 #
 
 """SpatioTemporal Open Research Manager."""
-
 from .storm import Storm
 
+from .models.node import NodeDraft, NodeRecord, NodeFiles
 from .models.project import Project
 
 from .version import __version__
@@ -20,10 +20,12 @@ from .version import __version__
 from .object_factory import ObjectFactory
 
 ObjectFactory.register("Project", Project)
-
+ObjectFactory.register("NodeDraft", NodeDraft)
+ObjectFactory.register("NodeFiles", NodeFiles)
+ObjectFactory.register("NodeRecord", NodeRecord)
 
 __all__ = (
-    "__version__",
+    "Storm",
 
-    "Storm"
+    "__version__"
 )

@@ -1,4 +1,10 @@
-
+#
+# This file is part of SpatioTemporal Open Research Manager.
+# Copyright (C) 2021 INPE.
+#
+# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for more details.
+#
 import aiofiles
 
 
@@ -14,7 +20,7 @@ async def file_chunks_generator(file_path: str, chunk_size: int = 8192):
 
     Returns:
         Coroutine: coroutine to read the file as chunks.
-    """ 
+    """
     async with aiofiles.open(file_path, "rb") as file_stream:
         while True:
             chunk_data = await file_stream.read(chunk_size)
