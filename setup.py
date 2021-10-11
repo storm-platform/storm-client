@@ -50,6 +50,10 @@ setup_requires = [
 
 install_requires = [
     'Click>=7.0',
+    'aiofiles>=0.7.0',
+    'cachetools>=4.2.4',
+    'pydash>=5.1.0',
+    'httpx>=0.19.0'
 ]
 
 packages = find_packages()
