@@ -54,6 +54,12 @@ class NodeService(BaseService):
 
         return ObjectFactory.resolve(self._node_type, operation_result.json())
 
+    def create(self, json, **kwargs):
+        json = json.to_json() if isinstance(json, NodeBase) else json
+        operation_result = self._create_request("POST", self.url, json=json, **kwargs)
+
+        return ObjectFactory.resolve(self._node_type, operation_result.json())
+
 
 __all__ = (
     "NodeService"

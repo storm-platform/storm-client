@@ -16,6 +16,10 @@ class Project(BaseModel):
         super(Project, self).__init__(data or {})
 
     @property
+    def id(self):
+        return py_.get(self, "id", None)
+
+    @property
     def title(self):
         return py_.get(self, "title", None)
 
@@ -26,6 +30,9 @@ class Project(BaseModel):
     @property
     def is_public(self):
         return py_.get(self, "is_public", None)
+
+    def to_json(self):
+        return self.data
 
 
 __all__ = (

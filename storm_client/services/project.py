@@ -5,6 +5,7 @@
 # SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+from storm_client.models.project import Project
 from storm_client.services.base import BaseService
 from storm_client.object_factory import ObjectFactory
 
@@ -23,6 +24,7 @@ class ProjectService(BaseService):
         ]
 
     def create(self, json, **kwargs):
+        json = json.to_json() if isinstance(json, Project) else json
         operation_result = self._create_request("POST", self.url, json=json, **kwargs)
 
         return ObjectFactory.resolve("Project", operation_result.json())

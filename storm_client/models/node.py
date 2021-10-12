@@ -7,7 +7,11 @@
 #
 import os
 
+import ast
+import json
+
 import asyncio
+
 from pydash import py_
 
 from collections import UserDict, UserList
@@ -16,6 +20,30 @@ from collections.abc import Sequence
 from storm_client.network import HTTPXClient
 from storm_client.models.base import BaseModel
 from storm_client.object_factory import ObjectFactory
+
+
+class NodeJSONEncoder(json.JSONEncoder):
+
+    def _create_file_key(self, filename):
+        if isinstance(filename, str):
+            return {"key": os.path.join(filename)}
+        return filename
+
+    def default(self, o) -> dict:
+        if isinstance(o, NodeBase):
+            object_data = o.data
+
+            # applying rules to convert files
+            set_inputs = lambda data, prop: py_.set(data, prop,
+                                                    py_.chain(data).get(prop).map(
+                                                        self._create_file_key).value())
+
+            set_inputs(object_data, "data.inputs")
+            set_inputs(object_data, "data.outputs")
+
+            return object_data
+
+        raise TypeError("NodeJSONEncoder only encode `NodeBase` objects.")
 
 
 #
@@ -139,6 +167,7 @@ class NodeRecordLink(NodeLink):
 #
 class NodeBase(BaseModel):
     links_cls = NodeLink
+    serializer_cls = NodeJSONEncoder
 
     def __init__(self, data=None):
         super(NodeBase, self).__init__(data or {})
@@ -159,6 +188,7 @@ class NodeBase(BaseModel):
 
     @property
     def environment(self):
+        self._default_value("environment.key", None)
         return py_.get(self, "environment.key", None)
 
     @environment.setter
@@ -171,7 +201,7 @@ class NodeBase(BaseModel):
 
     @command.setter
     def command(self, data):
-        py_.set_(self, "command", data)
+        py_.set_(self.data, "command", data)
 
     @property
     def command_checksum(self):
@@ -179,16 +209,23 @@ class NodeBase(BaseModel):
 
     @command_checksum.setter
     def command_checksum(self, data):
-        py_.set_(self, "command_checksum", data)
+        py_.set_(self.data, "command_checksum", data)
 
     @property
     def metadata(self):
         self._default_value("metadata", {"author": None, "description": None})
         return py_.get(self, "metadata", None)
 
+    @metadata.setter
+    def metadata(self, metadata):
+        py_.set_(self.data, "metadata", metadata)
+
     @property
     def links(self):
         return self.links_cls(py_.get(self, "links", None))
+
+    def to_json(self):
+        return ast.literal_eval(json.dumps(self, cls=self.serializer_cls))
 
 
 class NodeDraft(NodeBase):
@@ -200,6 +237,7 @@ class NodeRecord(NodeBase):
 
 
 __all__ = (
+    "NodeBase",
     "NodeDraft",
     "NodeRecord",
 
