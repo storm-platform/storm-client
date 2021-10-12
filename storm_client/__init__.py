@@ -9,7 +9,10 @@
 """SpatioTemporal Open Research Manager."""
 from .storm import Storm
 
-from .models.node import NodeDraft, NodeRecord, NodeFiles
+from .models.node.files import NodeFiles, NodeFileEntry
+from .models.node.model import NodeDraft, NodeRecord
+from .models.node.link import NodeDraftLink, NodeRecordLink
+
 from .models.project import Project
 
 from .version import __version__
@@ -23,6 +26,9 @@ ObjectFactory.register("Project", Project)
 ObjectFactory.register("NodeDraft", NodeDraft)
 ObjectFactory.register("NodeFiles", NodeFiles)
 ObjectFactory.register("NodeRecord", NodeRecord)
+ObjectFactory.register("NodeFileEntry", NodeFileEntry)
+ObjectFactory.register("NodeDraftLink", NodeDraftLink)
+ObjectFactory.register("NodeRecordLink", NodeRecordLink)
 
 __all__ = (
     "Storm",

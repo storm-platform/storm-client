@@ -13,7 +13,7 @@ from storm_client.network import HTTPXClient
 
 class BaseService:
 
-    def __init__(self, service_url: str, base_path: str, access_token: str) -> None:
+    def __init__(self, service_url: str, base_path: str = None, access_token: str = None) -> None:
         self._base_path = base_path
         self._service_url = service_url
         self._access_token = access_token
@@ -22,6 +22,9 @@ class BaseService:
 
     @property
     def url(self):
+        if not self._base_path:
+            raise NotImplemented("This method is implemented to use `service_url` and `base_path`.")
+
         return posixpath.join(self._service_url, self._base_path)
 
     @property

@@ -8,10 +8,8 @@
 
 """SpatioTemporal Open Research Manager services accessor."""
 
-from cachetools import cached, LRUCache
-
-from storm_client.services.node import NodeService
 from storm_client.services.project import ProjectService
+from storm_client.services.node import NodeService, NodeFilesService
 
 
 class Storm:
@@ -20,14 +18,14 @@ class Storm:
         self._access_token = access_token
 
     @property
-    @cached(cache=LRUCache(maxsize=1))
     def project(self):
         return ProjectService(self._url, self._access_token)
 
-    @cached(cache=LRUCache(maxsize=1))
     def node_draft(self, project_id):
         return NodeService(self._url, self._access_token, project_id, as_draft=True)
 
-    @cached(cache=LRUCache(maxsize=1))
     def node_record(self, project_id):
         return NodeService(self._url, self._access_token, project_id, as_draft=False)
+
+    def node_files(self, node_resource):
+        return NodeFilesService(self._url, self._access_token, node_resource)
