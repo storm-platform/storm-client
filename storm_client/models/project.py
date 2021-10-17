@@ -5,7 +5,11 @@
 # SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+
 from pydash import py_
+
+from typing import Sequence
+from collections import UserList
 
 from storm_client.models.base import BaseModel
 
@@ -35,6 +39,19 @@ class Project(BaseModel):
         return self.data
 
 
+#
+# Project Collection
+#
+class ProjectList(UserList):
+    def __init__(self, data=None):
+        if not isinstance(data, Sequence):
+            raise ValueError('The `data` argument must be a valid sequence type.')
+
+        data = py_.map(data, lambda obj: Project(obj))
+        super(ProjectList, self).__init__(data)
+
+
 __all__ = (
-    "Project"
+    "Project",
+    "ProjectList"
 )

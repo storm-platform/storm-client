@@ -7,9 +7,8 @@
 #
 
 """SpatioTemporal Open Research Manager services accessor."""
-
-from storm_client.services.project import ProjectService
-from storm_client.services.node import NodeService, NodeFilesService
+from .services.accessor import NodeAccessor
+from .services.project import ProjectService
 
 
 class Storm:
@@ -21,11 +20,11 @@ class Storm:
     def project(self):
         return ProjectService(self._url, self._access_token)
 
-    def node_draft(self, project_id):
-        return NodeService(self._url, self._access_token, project_id, as_draft=True)
+    @property
+    def node(self):
+        return NodeAccessor(self._url, self._access_token)
 
-    def node_record(self, project_id):
-        return NodeService(self._url, self._access_token, project_id, as_draft=False)
 
-    def node_files(self, node_resource):
-        return NodeFilesService(self._url, self._access_token, node_resource)
+__all__ = (
+    "Storm"
+)

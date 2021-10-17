@@ -8,12 +8,14 @@
 import asyncio
 import posixpath
 
-from storm_client.network import HTTPXClient
+from pydash import py_
+
+from ..network import HTTPXClient
 
 
 class BaseService:
 
-    def __init__(self, service_url: str, base_path: str = None, access_token: str = None) -> None:
+    def __init__(self, service_url: str, base_path: str = None, access_token: str = None, **kwargs) -> None:
         self._base_path = base_path
         self._service_url = service_url
         self._access_token = access_token
@@ -35,7 +37,12 @@ class BaseService:
         return posixpath.join(*[self.url, *urls]).strip("/")
 
     def _create_request(self, method, url, **kwargs):
-        return asyncio.run(HTTPXClient.request(method, url, params=self._access_token_as_parameter, **kwargs))
+        response = asyncio.run(
+            HTTPXClient.request(method, url, **py_.merge(kwargs, {"params": self._access_token_as_parameter})),
+        )
+        response.raise_for_status()
+
+        return response
 
 
 __all__ = (

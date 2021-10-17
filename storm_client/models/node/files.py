@@ -8,12 +8,51 @@
 import os
 import asyncio
 
+from pydash import py_
+
+from typing import Dict, Union
+
+from storm_hasher import StormHasher
+
 from collections.abc import Sequence
 from collections import UserDict, UserList
 
-from pydash import py_
+from ...network import HTTPXClient
 
-from storm_client.network import HTTPXClient
+
+def create_file_object(filename: Union[Dict, str]) -> Dict:
+    """Create Storm records file entry.
+
+    Args:
+        filename (Union[Dict, str]): filename|path to file or invenio file record entry
+
+    Returns:
+        Dict: Dict with `filename` formated as Storm-WS file record entry object. The resulting object will have
+        the following format:
+
+            {
+                "key": filename
+            }
+    """
+    if isinstance(filename, str):
+        return {"key": os.path.join(filename)}
+    return filename
+
+
+def map_file_entry(data: Dict, data_path: str):
+    """Map all NodeBase files entry to a Invenio file record entry.
+
+    Args:
+        data (Dict): Dict with the NodeBase data.
+
+        data_path (str): Path to the attribute where file entries is on the `data` object.
+
+    Note:
+        The file mapping is done in-place on `data` object.
+    """
+    return py_.set(data, data_path,
+                   py_.chain(data).get(data_path).map(
+                       create_file_object).value())
 
 
 #
@@ -47,7 +86,6 @@ class NodeFileEntry(UserDict):
     def commit_url(self):
         return py_.get(self, "links.commit", None)
 
-    # ToDo: Implement the checksum validation
     def download(self, output_directory, validate_checksum=False):
         file_content_link = self.content_url
 
@@ -57,6 +95,13 @@ class NodeFileEntry(UserDict):
 
             # download!
             asyncio.run(HTTPXClient.download(file_content_link, output_file))
+
+            if validate_checksum:
+                downloaded_file_checksum = StormHasher("md5").hash_file(output_file)
+
+                if downloaded_file_checksum != self.checksum.split(":")[-1]:
+                    raise RuntimeError(f"Checksum for {self.filename} is not valid!")
+
             return output_file
         raise FileNotFoundError("File content is not available!")
 
@@ -73,5 +118,8 @@ class NodeFiles(UserList):
 
 __all__ = (
     "NodeFiles",
-    "NodeFileEntry"
+    "NodeFileEntry",
+
+    "map_file_entry",
+    "create_file_object"
 )

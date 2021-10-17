@@ -8,7 +8,7 @@
 import httpx
 import aiofiles
 
-from storm_client.io import file_chunks_generator
+from .io import file_chunks_generator
 
 
 class HTTPXClient:

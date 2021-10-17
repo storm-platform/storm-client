@@ -6,14 +6,16 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 
-import ast
 import json
 from json import JSONEncoder
 
 from pydash import py_
 
-from storm_client.models.base import BaseModel
-from storm_client.models.node.link import NodeLink
+from .link import NodeLink
+from .files import map_file_entry
+from .type import is_draft, is_record
+
+from ..base import BaseModel
 
 
 class NodeBase(BaseModel):
@@ -30,11 +32,15 @@ class NodeBase(BaseModel):
     @property
     def inputs(self):
         self._default_value("data.inputs", [])
+
+        map_file_entry(self.data, "data.inputs")
         return py_.get(self, "data.inputs")
 
     @property
     def outputs(self):
         self._default_value("data.outputs", [])
+
+        map_file_entry(self.data, "data.outputs")
         return py_.get(self, "data.outputs")
 
     @property
@@ -75,8 +81,16 @@ class NodeBase(BaseModel):
     def links(self):
         return self.links_cls(py_.get(self, "links", None))
 
+    @property
+    def is_draft(self):
+        return is_draft(self.data)
+
+    @property
+    def is_record(self):
+        return is_record(self.data)
+
     def to_json(self):
-        return ast.literal_eval(json.dumps(self, cls=self.serializer_cls))
+        return json.loads(json.dumps(self, cls=self.serializer_cls))
 
 
 __all__ = (

@@ -5,23 +5,34 @@
 # SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
-from typing import Union
-
+import asyncio
 import posixpath
 
-import asyncio
+import warnings
+
 from pydash import py_
-from cachetools import cached, LRUCache
 
-from storm_client.network import HTTPXClient
-from storm_client.models.node.base import NodeBase
-from storm_client.services.base import BaseService
-from storm_client.object_factory import ObjectFactory
+from typeguard import typechecked
+from typing import Dict, List, Union
+
+from .base import BaseService
+from ..models import NodeRecord
+
+from ..network import HTTPXClient
+from ..object_factory import ObjectFactory
+
+from ..models.node import NodeDraft, NodeBase, create_file_object
 
 
+def _node_obj_to_dict(node_obj: Union[Dict, NodeBase]):
+    """Transform NodeBase instance to a dict instance."""
+    return node_obj.to_json() if isinstance(node_obj, NodeBase) else node_obj
+
+
+@typechecked
 class NodeService(BaseService):
 
-    def __init__(self, url: str, access_token: str, project_id: int, as_draft=False) -> None:
+    def __init__(self, url: str, access_token: str, project_id: int, as_draft: bool = False) -> None:
         base_path = posixpath.join("graph", str(project_id), "node")
         super(NodeService, self).__init__(url, base_path, access_token)
 
@@ -40,39 +51,48 @@ class NodeService(BaseService):
     def is_draft_service(self):
         return self._as_draft
 
-    @cached(cache=LRUCache(maxsize=128))
-    def search(self, **kwargs):
-        operation_result = self._create_request("GET", self.url, **kwargs)
-
-        return [
-            ObjectFactory.resolve(self._node_type, response) for response in
-            py_.get(operation_result.json(), "hits.hits", {})
-        ]
-
-    def resolve(self, node_id: str, **kwargs) -> Union[NodeBase, None]:
+    def resolve(self, node_id: str, request_options: Dict = {}) -> Union[NodeBase, None]:
         node_id_url = self._build_url([node_id, self._complement_url])
-        operation_result = self._create_request("GET", node_id_url, **kwargs)
+        operation_result = self._create_request("GET", node_id_url, **request_options)
 
         return ObjectFactory.resolve(self._node_type, operation_result.json())
 
-    def create(self, json, **kwargs):
-        json = json.to_json() if isinstance(json, NodeBase) else json
-        operation_result = self._create_request("POST", self.url, json=json, **kwargs)
+    def create(self, data: NodeDraft, request_options: Dict = {}):
+        json = _node_obj_to_dict(data)
+        operation_result = self._create_request("POST", self.url, json=json, **request_options)
 
         return ObjectFactory.resolve(self._node_type, operation_result.json())
 
-    def publish_node(self, node_resource, **kwargs):
-        # ToDo: Validate that the `node_resource` is a draft
+    def save(self, data: NodeDraft, request_options: Dict = {}):
+        json = _node_obj_to_dict(data)
+
+        self_node_link = py_.get(json, "links.self", None)
+        operation_result = self._create_request("PUT", self_node_link, json=json, **request_options)
+
+        # Editable records on storm are new drafts
+        return ObjectFactory.resolve("NodeDraft", operation_result.json())
+
+    def new_version(self, data: NodeRecord, request_options: Dict = {}) -> NodeDraft:
+        json = _node_obj_to_dict(data)
+
+        versions_link = py_.get(json, "links.versions", None)
+        operation_result = self._create_request("POST", versions_link, json=json, **request_options)
+
+        # New records on storm are drafts
+        return ObjectFactory.resolve("NodeDraft", operation_result.json())
+
+    def publish(self, data: NodeDraft, request_options: Dict = {}) -> NodeRecord:
         # publishing the resource
-        publish_node = node_resource.links["publish"]
+        publish_node = data.links["publish"]
 
-        response = self._create_request("POST", publish_node, **kwargs)
+        response = self._create_request("POST", publish_node, **request_options)
         return ObjectFactory.resolve("NodeRecord", response.json())  # record is fixed here
 
 
+@typechecked
 class NodeFilesService(BaseService):
 
-    def __init__(self, url: str, access_token: str, node_resource) -> None:
+    def __init__(self, url: str, access_token: str, node_resource: NodeDraft) -> None:
         super(NodeFilesService, self).__init__(url, access_token=access_token)
 
         if py_.is_none(node_resource.id):
@@ -81,24 +101,34 @@ class NodeFilesService(BaseService):
         self._node_resource = node_resource
         self._node_link_type = type(node_resource.links).__name__
 
-    def _define_node_files(self, files, **kwargs):
+    def _define_node_files(self, files: List, request_options: Dict = {}) -> Dict:
         # preparing the files
-        files = py_.map(files, lambda x: {"key": x} if isinstance(x, str) else x)
+        files = py_.map(files, create_file_object)
         files_link = py_.get(self._node_resource, "links.files", None)
 
-        operation_result = self._create_request("POST", files_link, json=files, **kwargs)
+        operation_result = self._create_request("POST", files_link, json=files, **request_options)
         return operation_result.json()
 
-    def upload_files(self, files, commit=False, **kwargs):
+    def upload_files(self, files: Dict, commit: bool = False, request_options: Dict = {}) -> NodeDraft:
         # extracting files
-        get_keys = lambda path: py_(self._node_resource).get(path).map(lambda x: x["key"]).value()
-        node_resource_files = py_.interleave(get_keys("data.inputs"), get_keys("data.outputs"))
+        get_file_entry = lambda obj: py_.map(obj, lambda x: x["key"])
+        node_resource_files = py_.interleave(
+            get_file_entry(self._node_resource.inputs),
+            get_file_entry(self._node_resource.outputs),
+        )
 
-        # check if files is defined on record (to avoid API validation errors)
+        # checking if files is defined on record (to avoid API validation errors)
         intersected_files = py_.intersection(node_resource_files, files.keys())
+
+        # checking for invalid files
+        invalid_files = py_.difference(node_resource_files, files.keys())
+        invalid_files = ",".join(invalid_files)
 
         responses = []
         if intersected_files:
+            if invalid_files:
+                warnings.warn(f"Invalid files found ({invalid_files}). Only files defined on Node will be uploaded.")
+
             defined_files = self._define_node_files(intersected_files)
 
             for defined_file in py_.get(defined_files, "entries", []):
@@ -115,11 +145,15 @@ class NodeFilesService(BaseService):
                     response_json = response.json()
 
                     commit_url = py_.get(response_json, "links.commit")
-                    self._create_request("POST", commit_url, json=files, **kwargs)
+                    self._create_request("POST", commit_url, json=files, **request_options)
 
             return self._node_resource.links.self
-        # ToDo: Improve exception handler
-        raise FileNotFoundError("The defined files could not be sent to the service.")
+
+        # error if only invalid files is defined in input.
+        if invalid_files:
+            raise ValueError(
+                f"Invalid files found ({invalid_files}). "
+                f"Files must be defined in the Node node before being sent to the server")
 
 
 __all__ = (

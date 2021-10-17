@@ -5,15 +5,20 @@
 # SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 #
+from pydash import py_
 
-"""SpatioTemporal Open Research Manager."""
+from typing import Dict
 
-from .storm import Storm
 
-from .version import __version__
+def is_draft(record_document: Dict):
+    return not py_.get(record_document, "is_published", True)
+
+
+def is_record(record_document: Dict):
+    return not is_draft(record_document)
+
 
 __all__ = (
-    "Storm",
-
-    "__version__"
+    "is_draft",
+    "is_record"
 )

@@ -11,8 +11,8 @@ from collections import UserDict
 
 from pydash import py_
 
-from storm_client.network import HTTPXClient
-from storm_client.object_factory import ObjectFactory
+from ...network import HTTPXClient
+from ...object_factory import ObjectFactory
 
 
 #
@@ -25,12 +25,12 @@ class NodeLink(UserDict):
 
         self.typename = typename
 
-    def __check_property(self, property_path):
+    def _check_property(self, property_path):
         if not py_.has(self, property_path):
             raise AttributeError(f"{property_path} attribute not available for this object!")
 
-    def __resolve_link(self, property_path, http_method="GET", typename=None):
-        self.__check_property(property_path)
+    def _resolve_link(self, property_path, http_method="GET", typename=None):
+        self._check_property(property_path)
 
         # check if the type must be forced
         typename = typename if typename else self.typename
@@ -50,34 +50,41 @@ class NodeLink(UserDict):
 
     @property
     def self(self):
-        return self.__resolve_link("self")
+        return self._resolve_link("self")
 
     @property
     def latest(self):
-        return self.__resolve_link("latest")
+        return self._resolve_link("latest")
 
     @property
     def draft(self):
-        # for the draft, `typename` always must be a `NodeDraft`
-        return self.__resolve_link("latest", http_method="POST", typename="NodeDraft")
+        raise NotImplementedError("You must use an implementation of the `NodeLink` class to access this operation.")
 
     @property
     def versions(self):
-        return self.__resolve_link("versions")
+        return self._resolve_link("versions")
 
     @property
     def files(self):
-        return self.__resolve_link("files", http_method="GET", typename="NodeFiles")
+        return self._resolve_link("files", http_method="GET", typename="NodeFiles")
 
 
 class NodeDraftLink(NodeLink):
     def __init__(self, data=None):
         super(NodeDraftLink, self).__init__("NodeDraft", data or {})
 
+    @property
+    def draft(self):
+        return self._resolve_link("draft", http_method="GET", typename="NodeDraft")
+
 
 class NodeRecordLink(NodeLink):
     def __init__(self, data=None):
         super(NodeRecordLink, self).__init__("NodeRecord", data or {})
+
+    @property
+    def draft(self):
+        return self._resolve_link("draft", http_method="POST", typename="NodeRecord")
 
 
 __all__ = (

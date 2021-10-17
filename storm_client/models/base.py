@@ -9,10 +9,10 @@ from pydash import py_
 
 from collections import UserDict
 
-from storm_client.models.serializer import Serializer
+from .serializer import JSONSerializable
 
 
-class BaseModel(UserDict, Serializer):
+class BaseModel(UserDict, JSONSerializable):
 
     def _default_value(self, property_path, value):
         return py_.defaults_deep(self, py_.set_({}, property_path, value))
