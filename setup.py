@@ -53,7 +53,9 @@ install_requires = [
     'aiofiles>=0.7.0',
     'cachetools>=4.2.4',
     'pydash>=5.1.0',
-    'httpx>=0.19.0'
+    'httpx>=0.19.0',
+    'typeguard>=2.13.0',
+    'storm-hasher>=0.1.0'
 ]
 
 packages = find_packages()
@@ -68,7 +70,7 @@ setup(
     version=version,
     description=__doc__,
     long_description=readme + '\n\n' + history,
-    long_description_content_type = 'text/x-rst',
+    long_description_content_type='text/x-rst',
     keywords=['Time series', 'Earth Observations'],
     license='MIT',
     author='Brazil Data Cube Team',
