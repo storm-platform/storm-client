@@ -7,8 +7,8 @@
 #
 
 """SpatioTemporal Open Research Manager services accessor."""
-from .services.accessor import NodeAccessor
 from .services.project import ProjectService
+from .services.accessor import CompendiumAccessor
 
 
 class Storm:
@@ -22,7 +22,7 @@ class Storm:
 
     @property
     def node(self):
-        return NodeAccessor(self._url, self._access_token)
+        return CompendiumAccessor(self._url, self._access_token)
 
 
 __all__ = (

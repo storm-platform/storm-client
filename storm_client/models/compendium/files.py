@@ -40,10 +40,10 @@ def create_file_object(filename: Union[Dict, str]) -> Dict:
 
 
 def map_file_entry(data: Dict, data_path: str):
-    """Map all NodeBase files entry to a Invenio file record entry.
+    """Map all CompendiumBase files entry to a Invenio file record entry.
 
     Args:
-        data (Dict): Dict with the NodeBase data.
+        data (Dict): Dict with the CompendiumBase data.
 
         data_path (str): Path to the attribute where file entries is on the `data` object.
 
@@ -56,11 +56,11 @@ def map_file_entry(data: Dict, data_path: str):
 
 
 #
-# Node files
+# Compendium files
 #
-class NodeFileEntry(UserDict):
+class CompendiumFileEntry(UserDict):
     def __init__(self, data=None):
-        super(NodeFileEntry, self).__init__(data or {})
+        super(CompendiumFileEntry, self).__init__(data or {})
 
     @property
     def filename(self):
@@ -106,19 +106,19 @@ class NodeFileEntry(UserDict):
         raise FileNotFoundError("File content is not available!")
 
 
-class NodeFiles(UserList):
+class CompendiumFiles(UserList):
 
     def __init__(self, data=None):
         if not isinstance(data, Sequence):
             raise ValueError('The `data` argument must be a valid sequence type.')
 
-        data = [NodeFileEntry(file_entry) for file_entry in py_.get(data, [])]
-        super(NodeFiles, self).__init__(data)
+        data = [CompendiumFileEntry(file_entry) for file_entry in py_.get(data, [])]
+        super(CompendiumFiles, self).__init__(data)
 
 
 __all__ = (
-    "NodeFiles",
-    "NodeFileEntry",
+    "CompendiumFiles",
+    "CompendiumFileEntry",
 
     "map_file_entry",
     "create_file_object"

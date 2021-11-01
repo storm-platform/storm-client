@@ -7,14 +7,14 @@
 #
 import json
 
-from .base import NodeBase
+from .base import CompendiumBase
 from .files import map_file_entry
 
 
-class NodeJSONEncoder(json.JSONEncoder):
+class CompendiumJSONEncoder(json.JSONEncoder):
 
     def default(self, o) -> dict:
-        if isinstance(o, NodeBase):
+        if isinstance(o, CompendiumBase):
             object_data = o.data
 
             map_file_entry(object_data, "data.inputs")
@@ -22,9 +22,9 @@ class NodeJSONEncoder(json.JSONEncoder):
 
             return object_data
 
-        raise TypeError("`NodeJSONEncoder` only encode `NodeBase` objects.")
+        raise TypeError("`CompendiumJSONEncoder` only encode `CompendiumBase` objects.")
 
 
 __all__ = (
-    "NodeJSONEncoder"
+    "CompendiumJSONEncoder"
 )

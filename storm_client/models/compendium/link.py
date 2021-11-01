@@ -16,12 +16,12 @@ from ...object_factory import ObjectFactory
 
 
 #
-# Node links
+# Compendium links
 #
-class NodeLink(UserDict):
+class CompendiumLink(UserDict):
 
     def __init__(self, typename, data=None):
-        super(NodeLink, self).__init__(data or {})
+        super(CompendiumLink, self).__init__(data or {})
 
         self.typename = typename
 
@@ -58,7 +58,7 @@ class NodeLink(UserDict):
 
     @property
     def draft(self):
-        raise NotImplementedError("You must use an implementation of the `NodeLink` class to access this operation.")
+        raise NotImplementedError("You must use an implementation of the `CompendiumLink` class to access this operation.")
 
     @property
     def versions(self):
@@ -66,29 +66,29 @@ class NodeLink(UserDict):
 
     @property
     def files(self):
-        return self._resolve_link("files", http_method="GET", typename="NodeFiles")
+        return self._resolve_link("files", http_method="GET", typename="CompendiumFiles")
 
 
-class NodeDraftLink(NodeLink):
+class CompendiumDraftLink(CompendiumLink):
     def __init__(self, data=None):
-        super(NodeDraftLink, self).__init__("NodeDraft", data or {})
+        super(CompendiumDraftLink, self).__init__("CompendiumDraft", data or {})
 
     @property
     def draft(self):
-        return self._resolve_link("draft", http_method="GET", typename="NodeDraft")
+        return self._resolve_link("draft", http_method="GET", typename="CompendiumDraft")
 
 
-class NodeRecordLink(NodeLink):
+class CompendiumRecordLink(CompendiumLink):
     def __init__(self, data=None):
-        super(NodeRecordLink, self).__init__("NodeRecord", data or {})
+        super(CompendiumRecordLink, self).__init__("CompendiumRecord", data or {})
 
     @property
     def draft(self):
-        return self._resolve_link("draft", http_method="POST", typename="NodeRecord")
+        return self._resolve_link("draft", http_method="POST", typename="CompendiumRecord")
 
 
 __all__ = (
-    "NodeLink",
-    "NodeDraftLink",
-    "NodeRecordLink"
+    "CompendiumLink",
+    "CompendiumDraftLink",
+    "CompendiumRecordLink"
 )
