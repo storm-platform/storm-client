@@ -10,19 +10,19 @@ from pydash import py_
 from ..object_factory import ObjectFactory
 
 from ..models.project import Project
-from .node.files import NodeFiles, NodeFileEntry
-from .node.link import NodeDraftLink, NodeRecordLink
-from .node.model import NodeDraft, NodeRecord, NodeRecordList
+from .compendium.files import CompendiumFiles, CompendiumFileEntry
+from .compendium.link import CompendiumDraftLink, CompendiumRecordLink
+from .compendium.model import CompendiumDraft, CompendiumRecord, CompendiumRecordList
 
 FACTORY_CLASSES = {
     "Project": Project,
-    "NodeDraft": NodeDraft,
-    "NodeFiles": NodeFiles,
-    "NodeRecord": NodeRecord,
-    "NodeFileEntry": NodeFileEntry,
-    "NodeDraftLink": NodeDraftLink,
-    "NodeRecordLink": NodeRecordLink,
-    "NodeRecordList": NodeRecordList
+    "CompendiumDraft": CompendiumDraft,
+    "CompendiumFiles": CompendiumFiles,
+    "CompendiumRecord": CompendiumRecord,
+    "CompendiumFileEntry": CompendiumFileEntry,
+    "CompendiumDraftLink": CompendiumDraftLink,
+    "CompendiumRecordLink": CompendiumRecordLink,
+    "CompendiumRecordList": CompendiumRecordList
 }
 
 py_.map(

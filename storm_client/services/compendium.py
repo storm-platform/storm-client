@@ -16,84 +16,84 @@ from typeguard import typechecked
 from typing import Dict, List, Union
 
 from .base import BaseService
-from ..models import NodeRecord
+from ..models import CompendiumRecord
 
 from ..network import HTTPXClient
 from ..object_factory import ObjectFactory
 
-from ..models.node import NodeDraft, NodeBase, create_file_object
+from ..models.compendium import CompendiumDraft, CompendiumBase, create_file_object
 
 
-def _node_obj_to_dict(node_obj: Union[Dict, NodeBase]):
-    """Transform NodeBase instance to a dict instance."""
-    return node_obj.to_json() if isinstance(node_obj, NodeBase) else node_obj
+def _node_obj_to_dict(node_obj: Union[Dict, CompendiumBase]):
+    """Transform CompendiumBase instance to a dict instance."""
+    return node_obj.to_json() if isinstance(node_obj, CompendiumBase) else node_obj
 
 
 @typechecked
-class NodeService(BaseService):
+class CompendiumService(BaseService):
 
     def __init__(self, url: str, access_token: str, project_id: int, as_draft: bool = False) -> None:
-        base_path = posixpath.join("graph", str(project_id), "node")
-        super(NodeService, self).__init__(url, base_path, access_token)
+        base_path = posixpath.join("pipeline", str(project_id), "compendium")
+        super(CompendiumService, self).__init__(url, base_path, access_token)
 
         self._as_draft = as_draft
         self._project_id = project_id
 
         # defining the node type
-        self._node_type = "NodeRecord"
+        self._node_type = "CompendiumRecord"
         self._complement_url = ""
 
         if as_draft:
-            self._node_type = "NodeDraft"
+            self._node_type = "CompendiumDraft"
             self._complement_url = "draft"
 
     @property
     def is_draft_service(self):
         return self._as_draft
 
-    def resolve(self, node_id: str, request_options: Dict = {}) -> Union[NodeBase, None]:
+    def resolve(self, node_id: str, request_options: Dict = {}) -> Union[CompendiumBase, None]:
         node_id_url = self._build_url([node_id, self._complement_url])
         operation_result = self._create_request("GET", node_id_url, **request_options)
 
         return ObjectFactory.resolve(self._node_type, operation_result.json())
 
-    def create(self, data: NodeDraft, request_options: Dict = {}):
+    def create(self, data: CompendiumDraft, request_options: Dict = {}):
         json = _node_obj_to_dict(data)
         operation_result = self._create_request("POST", self.url, json=json, **request_options)
 
         return ObjectFactory.resolve(self._node_type, operation_result.json())
 
-    def save(self, data: NodeDraft, request_options: Dict = {}):
+    def save(self, data: CompendiumDraft, request_options: Dict = {}):
         json = _node_obj_to_dict(data)
 
         self_node_link = py_.get(json, "links.self", None)
         operation_result = self._create_request("PUT", self_node_link, json=json, **request_options)
 
         # Editable records on storm are new drafts
-        return ObjectFactory.resolve("NodeDraft", operation_result.json())
+        return ObjectFactory.resolve("CompendiumDraft", operation_result.json())
 
-    def new_version(self, data: NodeRecord, request_options: Dict = {}) -> NodeDraft:
+    def new_version(self, data: CompendiumRecord, request_options: Dict = {}) -> CompendiumDraft:
         json = _node_obj_to_dict(data)
 
         versions_link = py_.get(json, "links.versions", None)
         operation_result = self._create_request("POST", versions_link, json=json, **request_options)
 
         # New records on storm are drafts
-        return ObjectFactory.resolve("NodeDraft", operation_result.json())
+        return ObjectFactory.resolve("CompendiumDraft", operation_result.json())
 
-    def publish(self, data: NodeDraft, request_options: Dict = {}) -> NodeRecord:
+    def publish(self, data: CompendiumDraft, request_options: Dict = {}) -> CompendiumRecord:
         # publishing the resource
         publish_node = data.links["publish"]
 
         response = self._create_request("POST", publish_node, **request_options)
-        return ObjectFactory.resolve("NodeRecord", response.json())  # record is fixed here
+        return ObjectFactory.resolve("CompendiumRecord", response.json())  # record is fixed here
 
 
 @typechecked
-class NodeFilesService(BaseService):
+class CompendiumFilesService(BaseService):
 
-    def __init__(self, url: str, access_token: str, node_resource: NodeDraft) -> None:
-        super(NodeFilesService, self).__init__(url, access_token=access_token)
+    def __init__(self, url: str, access_token: str, node_resource: CompendiumDraft) -> None:
+        super(CompendiumFilesService, self).__init__(url, access_token=access_token)
 
         if py_.is_none(node_resource.id):
             raise TypeError("The `node_resource` should be a defined Storm Service object.")
@@ -109,7 +109,7 @@ class NodeFilesService(BaseService):
         operation_result = self._create_request("POST", files_link, json=files, **request_options)
         return operation_result.json()
 
-    def upload_files(self, files: Dict, commit: bool = False, request_options: Dict = {}) -> NodeDraft:
+    def upload_files(self, files: Dict, commit: bool = False, request_options: Dict = {}) -> CompendiumDraft:
         # extracting files
         get_file_entry = lambda obj: py_.map(obj, lambda x: x["key"])
         node_resource_files = py_.interleave(
@@ -157,6 +157,6 @@ class NodeFilesService(BaseService):
 
 
 __all__ = (
-    "NodeService",
-    "NodeFilesService"
+    "CompendiumService",
+    "CompendiumFilesService"
 )

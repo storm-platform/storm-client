@@ -6,19 +6,19 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 #
 
-from .base import NodeBase
-from .model import NodeDraft, NodeRecord
+from .base import CompendiumBase
+from .model import CompendiumDraft, CompendiumRecord
 
-from .files import NodeFiles, NodeFileEntry, map_file_entry, create_file_object
+from .files import CompendiumFiles, CompendiumFileEntry, map_file_entry, create_file_object
 
 __all__ = (
-    "NodeBase",
-    "NodeDraft",
-    "NodeRecord",
+    "CompendiumBase",
+    "CompendiumDraft",
+    "CompendiumRecord",
 
     # Files
-    "NodeFiles",
-    "NodeFileEntry",
+    "CompendiumFiles",
+    "CompendiumFileEntry",
 
     # Helpers for files
     "map_file_entry",

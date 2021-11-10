@@ -11,19 +11,19 @@ from json import JSONEncoder
 
 from pydash import py_
 
-from .link import NodeLink
+from .link import CompendiumLink
 from .files import map_file_entry
 from .type import is_draft, is_record
 
 from ..base import BaseModel
 
 
-class NodeBase(BaseModel):
-    links_cls = NodeLink
+class CompendiumBase(BaseModel):
+    links_cls = CompendiumLink
     serializer_cls = JSONEncoder
 
     def __init__(self, data=None):
-        super(NodeBase, self).__init__(data or {})
+        super(CompendiumBase, self).__init__(data or {})
 
     @property
     def id(self):
@@ -94,5 +94,5 @@ class NodeBase(BaseModel):
 
 
 __all__ = (
-    "NodeBase"
+    "CompendiumBase"
 )
