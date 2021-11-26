@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
+
 import json
 
 from .base import CompendiumBase
@@ -12,7 +12,6 @@ from .files import map_file_entry
 
 
 class CompendiumJSONEncoder(json.JSONEncoder):
-
     def default(self, o) -> dict:
         if isinstance(o, CompendiumBase):
             object_data = o.data
@@ -25,6 +24,4 @@ class CompendiumJSONEncoder(json.JSONEncoder):
         raise TypeError("`CompendiumJSONEncoder` only encode `CompendiumBase` objects.")
 
 
-__all__ = (
-    "CompendiumJSONEncoder"
-)
+__all__ = "CompendiumJSONEncoder"

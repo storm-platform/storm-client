@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
 
 from pydash import py_
 
@@ -15,7 +14,6 @@ from storm_client.models.base import BaseModel
 
 
 class Project(BaseModel):
-
     def __init__(self, data=None):
         super(Project, self).__init__(data or {})
 
@@ -45,13 +43,10 @@ class Project(BaseModel):
 class ProjectList(UserList):
     def __init__(self, data=None):
         if not isinstance(data, Sequence):
-            raise ValueError('The `data` argument must be a valid sequence type.')
+            raise ValueError("The `data` argument must be a valid sequence type.")
 
         data = py_.map(data, lambda obj: Project(obj))
         super(ProjectList, self).__init__(data)
 
 
-__all__ = (
-    "Project",
-    "ProjectList"
-)
+__all__ = ("Project", "ProjectList")

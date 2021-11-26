@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
 
 """SpatioTemporal Open Research Manager object factory."""
 
@@ -27,6 +26,4 @@ class ObjectFactory:
         raise NotImplemented(f"Factory for {datatype} is not implemented.")
 
 
-__all__ = (
-    "ObjectFactory"
-)
+__all__ = "ObjectFactory"

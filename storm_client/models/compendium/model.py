@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
+
 from pydash import py_
 
 from typing import Sequence
@@ -32,14 +32,15 @@ class CompendiumRecord(CompendiumBase):
 class CompendiumRecordList(UserList):
     def __init__(self, data=None):
         if not isinstance(data, Sequence):
-            raise ValueError('The `data` argument must be a valid sequence type.')
+            raise ValueError("The `data` argument must be a valid sequence type.")
 
-        data = py_.map(data, lambda obj: CompendiumDraft(obj) if is_draft(obj) else CompendiumRecord(obj))
+        data = py_.map(
+            data,
+            lambda obj: CompendiumDraft(obj)
+            if is_draft(obj)
+            else CompendiumRecord(obj),
+        )
         super(CompendiumRecordList, self).__init__(data)
 
 
-__all__ = (
-    "CompendiumDraft",
-    "CompendiumRecord",
-    "CompendiumRecordList"
-)
+__all__ = ("CompendiumDraft", "CompendiumRecord", "CompendiumRecordList")

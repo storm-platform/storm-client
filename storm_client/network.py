@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
+
 import httpx
 import aiofiles
 
@@ -12,7 +12,6 @@ from .io import file_chunks_generator
 
 
 class HTTPXClient:
-
     @staticmethod
     async def request(method, url, **kwargs):
         """Asynchronous HTTP request.
@@ -38,7 +37,9 @@ class HTTPXClient:
 
     @staticmethod
     async def upload(method, url, file_path, **kwargs):
-        return await HTTPXClient.request(method=method, url=url, data=file_chunks_generator(file_path), **kwargs)
+        return await HTTPXClient.request(
+            method=method, url=url, data=file_chunks_generator(file_path), **kwargs
+        )
 
     @staticmethod
     async def download(url, output_file):
@@ -50,6 +51,4 @@ class HTTPXClient:
         return output_file
 
 
-__all__ = (
-    "HTTPXClient"
-)
+__all__ = "HTTPXClient"

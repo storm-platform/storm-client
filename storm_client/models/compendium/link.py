@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
 
 import asyncio
 from collections import UserDict
@@ -19,7 +18,6 @@ from ...object_factory import ObjectFactory
 # Compendium links
 #
 class CompendiumLink(UserDict):
-
     def __init__(self, typename, data=None):
         super(CompendiumLink, self).__init__(data or {})
 
@@ -27,7 +25,9 @@ class CompendiumLink(UserDict):
 
     def _check_property(self, property_path):
         if not py_.has(self, property_path):
-            raise AttributeError(f"{property_path} attribute not available for this object!")
+            raise AttributeError(
+                f"{property_path} attribute not available for this object!"
+            )
 
     def _resolve_link(self, property_path, http_method="GET", typename=None):
         self._check_property(property_path)
@@ -36,11 +36,14 @@ class CompendiumLink(UserDict):
         typename = typename if typename else self.typename
 
         # making the request
-        response = asyncio.run(HTTPXClient.request(http_method, self[property_path])).json()
+        response = asyncio.run(
+            HTTPXClient.request(http_method, self[property_path])
+        ).json()
 
         if py_.has(response, "hits.hits"):  # for the `version` attribute
             return [
-                ObjectFactory.resolve(typename, r) for r in py_.get(response, "hits.hits")
+                ObjectFactory.resolve(typename, r)
+                for r in py_.get(response, "hits.hits")
             ]
 
         if py_.has(response, "entries"):  # for the `files` attribute
@@ -58,7 +61,9 @@ class CompendiumLink(UserDict):
 
     @property
     def draft(self):
-        raise NotImplementedError("You must use an implementation of the `CompendiumLink` class to access this operation.")
+        raise NotImplementedError(
+            "You must use an implementation of the `CompendiumLink` class to access this operation."
+        )
 
     @property
     def versions(self):
@@ -66,7 +71,9 @@ class CompendiumLink(UserDict):
 
     @property
     def files(self):
-        return self._resolve_link("files", http_method="GET", typename="CompendiumFiles")
+        return self._resolve_link(
+            "files", http_method="GET", typename="CompendiumFiles"
+        )
 
 
 class CompendiumDraftLink(CompendiumLink):
@@ -75,7 +82,9 @@ class CompendiumDraftLink(CompendiumLink):
 
     @property
     def draft(self):
-        return self._resolve_link("draft", http_method="GET", typename="CompendiumDraft")
+        return self._resolve_link(
+            "draft", http_method="GET", typename="CompendiumDraft"
+        )
 
 
 class CompendiumRecordLink(CompendiumLink):
@@ -84,11 +93,9 @@ class CompendiumRecordLink(CompendiumLink):
 
     @property
     def draft(self):
-        return self._resolve_link("draft", http_method="POST", typename="CompendiumRecord")
+        return self._resolve_link(
+            "draft", http_method="POST", typename="CompendiumRecord"
+        )
 
 
-__all__ = (
-    "CompendiumLink",
-    "CompendiumDraftLink",
-    "CompendiumRecordLink"
-)
+__all__ = ("CompendiumLink", "CompendiumDraftLink", "CompendiumRecordLink")

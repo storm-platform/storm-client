@@ -1,10 +1,10 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
+
 import os
 import asyncio
 
@@ -50,9 +50,9 @@ def map_file_entry(data: Dict, data_path: str):
     Note:
         The file mapping is done in-place on `data` object.
     """
-    return py_.set(data, data_path,
-                   py_.chain(data).get(data_path).map(
-                       create_file_object).value())
+    return py_.set(
+        data, data_path, py_.chain(data).get(data_path).map(create_file_object).value()
+    )
 
 
 #
@@ -107,10 +107,9 @@ class CompendiumFileEntry(UserDict):
 
 
 class CompendiumFiles(UserList):
-
     def __init__(self, data=None):
         if not isinstance(data, Sequence):
-            raise ValueError('The `data` argument must be a valid sequence type.')
+            raise ValueError("The `data` argument must be a valid sequence type.")
 
         data = [CompendiumFileEntry(file_entry) for file_entry in py_.get(data, [])]
         super(CompendiumFiles, self).__init__(data)
@@ -119,7 +118,6 @@ class CompendiumFiles(UserList):
 __all__ = (
     "CompendiumFiles",
     "CompendiumFileEntry",
-
     "map_file_entry",
-    "create_file_object"
+    "create_file_object",
 )

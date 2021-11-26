@@ -1,10 +1,9 @@
+# -*- coding: utf-8 -*-
 #
-# This file is part of SpatioTemporal Open Research Manager.
-# Copyright (C) 2021 INPE.
+# Copyright (C) 2021 Storm Project.
 #
-# SpatioTemporal Open Research Manager is free software; you can redistribute it and/or modify it
+# storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
-#
 
 """SpatioTemporal Open Research Manager."""
 
@@ -12,94 +11,92 @@ import os
 
 from setuptools import find_packages, setup
 
-readme = open('README.rst').read()
+readme = open("README.rst").read()
 
-history = open('CHANGES.rst').read()
+history = open("CHANGES.rst").read()
 
 docs_require = [
-    'Sphinx>=2.2',
-    'sphinx_rtd_theme',
-    'sphinx-copybutton',
+    "Sphinx>=2.2",
+    "sphinx_rtd_theme",
+    "sphinx-copybutton",
 ]
 
 tests_require = [
-    'coverage>=4.5',
-    'coveralls>=1.8',
-    'pytest>=5.2',
-    'pytest-cov>=2.8',
-    'pytest-pep8>=1.0',
-    'pydocstyle>=4.0',
-    'isort>4.3',
-    'check-manifest>=0.40',
+    "coverage>=4.5",
+    "coveralls>=1.8",
+    "pytest>=5.2",
+    "pytest-cov>=2.8",
+    "pytest-pep8>=1.0",
+    "pydocstyle>=4.0",
+    "isort>4.3",
+    "check-manifest>=0.40",
 ]
 
-examples_require = [
-]
+examples_require = []
 
 extras_require = {
-    'docs': docs_require,
-    'examples': examples_require,
-    'tests': tests_require,
+    "docs": docs_require,
+    "examples": examples_require,
+    "tests": tests_require,
 }
 
-extras_require['all'] = [req for _, reqs in extras_require.items() for req in reqs]
+extras_require["all"] = [req for _, reqs in extras_require.items() for req in reqs]
 
 setup_requires = [
-    'pytest-runner>=5.2',
+    "pytest-runner>=5.2",
 ]
 
 install_requires = [
-    'Click>=7.0',
-    'aiofiles>=0.7.0',
-    'cachetools>=4.2.4',
-    'pydash>=5.1.0',
-    'httpx>=0.19.0',
-    'typeguard>=2.13.0',
-    'storm-hasher>=0.1.0'
+    "Click>=7.0",
+    "aiofiles>=0.7.0",
+    "cachetools>=4.2.4",
+    "pydash>=5.1.0",
+    "httpx>=0.19.0",
+    "typeguard>=2.13.0",
+    "storm-hasher>=0.1.0",
 ]
 
 packages = find_packages()
 
 g = {}
-with open(os.path.join('storm_client', 'version.py'), 'rt') as fp:
+with open(os.path.join("storm_client", "version.py"), "rt") as fp:
     exec(fp.read(), g)
-    version = g['__version__']
+    version = g["__version__"]
 
 setup(
-    name='storm_client',
+    name="storm_client",
     version=version,
     description=__doc__,
-    long_description=readme + '\n\n' + history,
-    long_description_content_type='text/x-rst',
-    keywords=['Time series', 'Earth Observations'],
-    license='MIT',
-    author='Brazil Data Cube Team',
-    author_email='brazildatacube@inpe.br',
-    url='https://github.com/M3nin0/storm-client',
+    long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
+    keywords=["Storm Platform", "Client Library", "Earth Observations", "Reproducibility"],
+    license="MIT",
+    author="Felipe Menino Carlos",
+    author_email="felipe.carlos@inpe.br",
+    url="https://github.com/storm-platform/storm-client",
     project_urls={
-        'Repository': 'https://github.com/M3nin0/storm-client',
-        'Issues': 'https://github.com/M3nin0/storm-client/issues',
-        'Documentation': 'https://storm_client.readthedocs.io/en/latest/'
+        "Repository": "https://github.com/storm-platform/storm-client",
+        "Issues": "https://github.com/storm-platform/storm-client/issues",
+        "Documentation": "https://storm_client.readthedocs.io/en/latest/",
     },
     packages=packages,
     zip_safe=False,
     include_package_data=True,
-    platforms='any',
-    entry_points={
-    },
+    platforms="any",
+    entry_points={},
     extras_require=extras_require,
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
     classifiers=[
-        'Development Status :: 1 - Planning',
-        'Environment :: Web Environment',
-        'Intended Audience :: Education',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Scientific/Engineering :: GIS',
+        "Development Status :: 1 - Planning",
+        "Environment :: Web Environment",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: GIS",
     ],
 )
