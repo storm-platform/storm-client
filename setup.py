@@ -53,7 +53,7 @@ install_requires = [
     "pydash>=5.1.0",
     "httpx>=0.19.0",
     "typeguard>=2.13.0",
-    "storm-hasher>=0.1.0",
+    "storm-hasher @ git+https://github.com/storm-platform/storm-hasher",
 ]
 
 packages = find_packages()
@@ -69,7 +69,12 @@ setup(
     description=__doc__,
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
-    keywords=["Storm Platform", "Client Library", "Earth Observations", "Reproducibility"],
+    keywords=[
+        "Storm Platform",
+        "Client Library",
+        "Earth Observations",
+        "Reproducibility",
+    ],
     license="MIT",
     author="Felipe Menino Carlos",
     author_email="felipe.carlos@inpe.br",
