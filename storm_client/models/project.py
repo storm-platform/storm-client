@@ -14,8 +14,8 @@ from storm_client.models.base import BaseModel
 
 
 class Project(BaseModel):
-    def __init__(self, data=None):
-        super(Project, self).__init__(data or {})
+    def __init__(self, data=None, **kwargs):
+        super(Project, self).__init__(kwargs or data or {})
 
     @property
     def id(self):
@@ -23,15 +23,11 @@ class Project(BaseModel):
 
     @property
     def title(self):
-        return py_.get(self, "title", None)
+        return py_.get(self, "metadata.title", None)
 
     @property
-    def name(self):
-        return py_.get(self, "name", None)
-
-    @property
-    def is_public(self):
-        return py_.get(self, "is_public", None)
+    def description(self):
+        return py_.get(self, "metadata.description", None)
 
     def to_json(self):
         return self.data
@@ -42,6 +38,9 @@ class Project(BaseModel):
 #
 class ProjectList(UserList):
     def __init__(self, data=None):
+        if py_.has(data, "hits.hits"):  # elasticsearch specific result format
+            data = py_.get(data, "hits.hits")
+
         if not isinstance(data, Sequence):
             raise ValueError("The `data` argument must be a valid sequence type.")
 

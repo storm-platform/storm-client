@@ -16,7 +16,7 @@ from ..models.project import Project, ProjectList
 @typechecked
 class ProjectService(BaseService):
     def __init__(self, url: str, access_token: str) -> None:
-        base_path = "project"
+        base_path = "projects"
         super(ProjectService, self).__init__(url, base_path, access_token)
 
     def search(self, request_options: Dict = {}, **kwargs) -> ProjectList:
@@ -39,7 +39,7 @@ class ProjectService(BaseService):
 
         return self._create_request("DELETE", project_id_url, **request_options).json()
 
-    def resolve(self, project_id: int, request_options: Dict = {}) -> Project:
+    def resolve(self, project_id: str, request_options: Dict = {}) -> Project:
         project_id_url = self._build_url([str(project_id)])
         project_object = self._create_request(
             "GET", project_id_url, **request_options

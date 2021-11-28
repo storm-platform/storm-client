@@ -15,13 +15,18 @@ from .files import (
     create_file_object,
 )
 
+from .descriptor import ExecutionDescriptor
+
 __all__ = (
+    # Compendia
     "CompendiumBase",
     "CompendiumDraft",
     "CompendiumRecord",
     # Files
     "CompendiumFiles",
     "CompendiumFileEntry",
+    # Execution descriptors
+    "ExecutionDescriptor",
     # Helpers for files
     "map_file_entry",
     "create_file_object",

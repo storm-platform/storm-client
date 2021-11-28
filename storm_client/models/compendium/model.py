@@ -10,20 +10,25 @@ from pydash import py_
 from typing import Sequence
 from collections import UserList
 
-from .base import CompendiumBase
 from .type import is_draft
 from .encoder import CompendiumJSONEncoder
+
+from .base import CompendiumBase
+from .descriptor import ExecutionDescriptor
+
 from .link import CompendiumDraftLink, CompendiumRecordLink
 
 
 class CompendiumDraft(CompendiumBase):
     links_cls = CompendiumDraftLink
     serializer_cls = CompendiumJSONEncoder
+    descriptor_cls = ExecutionDescriptor
 
 
 class CompendiumRecord(CompendiumBase):
     links_cls = CompendiumRecordLink
     serializer_cls = CompendiumJSONEncoder
+    descriptor_cls = ExecutionDescriptor
 
 
 #

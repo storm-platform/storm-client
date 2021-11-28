@@ -32,9 +32,9 @@ def _node_obj_to_dict(node_obj: Union[Dict, CompendiumBase]):
 @typechecked
 class CompendiumService(BaseService):
     def __init__(
-        self, url: str, access_token: str, project_id: int, as_draft: bool = False
+        self, url: str, access_token: str, project_id: str, as_draft: bool = False
     ) -> None:
-        base_path = posixpath.join("pipeline", str(project_id), "compendium")
+        base_path = posixpath.join("projects", str(project_id), "compendia")
         super(CompendiumService, self).__init__(url, base_path, access_token)
 
         self._as_draft = as_draft

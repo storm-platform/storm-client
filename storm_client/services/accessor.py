@@ -32,7 +32,7 @@ class CompendiumAccessor(BaseServiceAccessor):
     def files(self, node_resource):
         return CompendiumFilesService(self._url, self._access_token, node_resource)
 
-    def search(self, project_id, user_records=False):
+    def search(self, project_id: str, user_records=False):
         return CompendiumSearchService(
             self._url, self._access_token, project_id, user_records
         )

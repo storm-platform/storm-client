@@ -14,71 +14,84 @@ from .link import CompendiumLink
 from .files import map_file_entry
 from .type import is_draft, is_record
 
+from .descriptor import ExecutionDescriptor
+
 from ..base import BaseModel
 
 
 class CompendiumBase(BaseModel):
     links_cls = CompendiumLink
     serializer_cls = JSONEncoder
+    descriptor_cls = ExecutionDescriptor
 
     def __init__(self, data=None):
         super(CompendiumBase, self).__init__(data or {})
 
     @property
     def id(self):
-        return py_.get(self, "id", None)
+        return py_.get(self.data, "id", None)
+
+    @property
+    def title(self):
+        return py_.get(self.data, "metadata.title", None)
+
+    @title.setter
+    def title(self, title):
+        py_.set_(self.data, "metadata.title", title)
+
+    @property
+    def description(self):
+        return py_.get(self.data, "metadata.description", None)
+
+    @description.setter
+    def description(self, description):
+        py_.set_(self.data, "metadata.description", description)
 
     @property
     def inputs(self):
-        self._default_value("data.inputs", [])
+        _value_path = "metadata.execution.data.inputs"
+        self._default_value(_value_path, [])
 
-        map_file_entry(self.data, "data.inputs")
-        return py_.get(self, "data.inputs")
+        map_file_entry(self.data, _value_path)
+        return py_.get(self.data, _value_path)
 
     @property
     def outputs(self):
-        self._default_value("data.outputs", [])
+        _value_path = "metadata.execution.data.outputs"
+        self._default_value(_value_path, [])
 
-        map_file_entry(self.data, "data.outputs")
-        return py_.get(self, "data.outputs")
-
-    @property
-    def environment(self):
-        self._default_value("environment.key", None)
-        return py_.get(self, "environment.key", None)
-
-    @environment.setter
-    def environment(self, data):
-        py_.set_(self, "environment.key", str(data))
+        map_file_entry(self.data, _value_path)
+        return py_.get(self.data, _value_path)
 
     @property
-    def command(self):
-        return py_.get(self, "command", None)
+    def descriptor(self):
+        _value_path = "metadata.execution.environment.descriptor"
+        self._default_value(_value_path, {})
 
-    @command.setter
-    def command(self, data):
-        py_.set_(self.data, "command", data)
+        return self.descriptor_cls(data=py_.get(self.data, _value_path, None))
 
-    @property
-    def command_checksum(self):
-        return py_.get(self, "command_checksum", None)
-
-    @command_checksum.setter
-    def command_checksum(self, data):
-        py_.set_(self.data, "command_checksum", data)
+    @descriptor.setter
+    def descriptor(self, data):
+        _value_path = "metadata.execution.environment.descriptor"
+        py_.set_(self.data, _value_path, data)
 
     @property
     def metadata(self):
-        self._default_value("metadata", {"author": None, "description": None})
-        return py_.get(self, "metadata", None)
+        _value_path = "metadata.execution.environment.meta"
+        return py_.get(self.data, _value_path, None)
 
     @metadata.setter
     def metadata(self, metadata):
-        py_.set_(self.data, "metadata", metadata)
+        _value_path = "metadata.execution.environment.meta"
+        py_.set_(self.data, _value_path, metadata)
+
+    @property
+    def errors(self):
+        return py_.get(self.data, "errors", [])
 
     @property
     def links(self):
-        return self.links_cls(py_.get(self, "links", None))
+        return self.links_cls(py_.get(self.data, "links", None))
 
     @property
     def is_draft(self):

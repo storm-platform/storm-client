@@ -21,7 +21,7 @@ class Storm:
         return ProjectService(self._url, self._access_token)
 
     @property
-    def node(self):
+    def compendium(self):
         return CompendiumAccessor(self._url, self._access_token)
 
 

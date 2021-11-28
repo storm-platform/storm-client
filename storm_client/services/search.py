@@ -22,9 +22,9 @@ from cachetools import cached, LRUCache
 @typechecked
 class CompendiumSearchService(BaseService):
     def __init__(
-        self, url: str, access_token: str, project_id: int, user_records: bool = False
+        self, url: str, access_token: str, project_id: str, user_records: bool = False
     ) -> None:
-        self._base_path = posixpath.join("pipeline", str(project_id), "compendium")
+        self._base_path = posixpath.join("projects", project_id, "compendia")
 
         if user_records:
             self._base_path = posixpath.join("user", self._base_path)

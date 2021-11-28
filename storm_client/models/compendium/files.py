@@ -97,6 +97,7 @@ class CompendiumFileEntry(UserDict):
             asyncio.run(HTTPXClient.download(file_content_link, output_file))
 
             if validate_checksum:
+                # md5 is fixed on `Storm WS`.
                 downloaded_file_checksum = StormHasher("md5").hash_file(output_file)
 
                 if downloaded_file_checksum != self.checksum.split(":")[-1]:
