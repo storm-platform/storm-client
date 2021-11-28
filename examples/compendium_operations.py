@@ -25,9 +25,7 @@ project_id = f"example-project-{str(uuid4())}"
 #
 # 1. Creating a Storm Client instance.
 #
-service = Storm(
-    "http://127.0.0.1:5000/api", "s3g3bXis5jMFyRny2oUmRk1koB0y0qKxfJN7IbiwnG"
-)
+service = Storm("http://127.0.0.1:5000/api", "")
 
 #
 # 2. List user available projects.
