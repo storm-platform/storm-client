@@ -5,24 +5,17 @@
     under the terms of the MIT License; see LICENSE file for more details.
 
 
-====================================
-SpatioTemporal Open Research Manager
-====================================
+=======================================================
+SpatioTemporal Open Research Manager Web Service Client
+=======================================================
 
 
 .. image:: https://img.shields.io/badge/license-MIT-green
-        :target: https://github.com//M3nin0/storm-client/blob/master/LICENSE
+        :target: https://github.com/storm-platform/storm-client/blob/master/LICENSE
         :alt: Software License
 
-
-.. image:: https://drone.dpi.inpe.br/api/badges/M3nin0/storm-client/status.svg
-        :target: https://drone.dpi.inpe.br/M3nin0/storm-client
-        :alt: Build Status
-
-
-.. image:: https://codecov.io/gh/M3nin0/storm-client/branch/master/graph/badge.svg
-        :target: https://codecov.io/gh/M3nin0/storm-client
-        :alt: Code Coverage Test
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+        :target: https://github.com/psf/black
 
 
 .. image:: https://readthedocs.org/projects/storm_client/badge/?version=latest
@@ -35,14 +28,12 @@ SpatioTemporal Open Research Manager
         :alt: Software Life Cycle
 
 
-.. image:: https://img.shields.io/github/tag/M3nin0/storm-client.svg
-        :target: https://github.com/M3nin0/storm-client/releases
-        :alt: Release
+.. image:: https://img.shields.io/pypi/dm/storm-client.svg
+        :target: https://pypi.python.org/pypi/storm-client
 
 
-.. image:: https://img.shields.io/pypi/v/storm_client
-        :target: https://pypi.org/project/storm_client/
-        :alt: Python Package Index
+.. image:: https://img.shields.io/github/tag/storm-platform/storm-client.svg
+        :target: https://github.com/storm-platform/storm-client/releases
 
 
 .. image:: https://img.shields.io/discord/689541907621085198?logo=discord&logoColor=ffffff&color=7389D8
@@ -53,5 +44,7 @@ SpatioTemporal Open Research Manager
 About
 =====
 
+A client library in Python for the SpatioTemporal Open Research Manager Web Service.
 
-A client library in Python for the SpatioTemporal Open Research Manager
+- Free software: MIT license;
+- Documentation: https://storm-client.readthedocs.io/
