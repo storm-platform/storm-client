@@ -5,7 +5,6 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-import os
 from pathlib import Path
 from typing import Union
 
@@ -80,7 +79,7 @@ class CompendiumFileMetadata(BaseModel):
         """File content url (to download)."""
         return self.get_field("links.content")
 
-    def download(
+    async def download(
         self, output_directory: Union[str, Path], validate_checksum: bool = False
     ):
         """Download the file entry content.
@@ -91,14 +90,14 @@ class CompendiumFileMetadata(BaseModel):
             validate_checksum (bool): Flag indicating if the file content must be validate with the
                                       checksum provided by the Storm WS.
         """
+        output_directory = Path(output_directory)
         file_content_link = self.content_url
 
         if file_content_link:
-            os.makedirs(output_directory, exist_ok=True)
-            output_file = os.path.join(output_directory, self.filename)
+            output_file = output_directory / self.filename
 
             # download!
-            HTTPXClient.download(file_content_link, output_file)
+            await HTTPXClient.download(file_content_link, output_file)
 
             if validate_checksum:
                 # md5 is fixed on `Storm WS`.

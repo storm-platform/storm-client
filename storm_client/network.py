@@ -6,6 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 import httpx
+import aiofiles
 from pydash import py_
 
 from .store import TokenStore
@@ -66,7 +67,7 @@ class HTTPXClient:
             return client.request(method, url, **cls._proxy_request(kwargs or {}))
 
     @classmethod
-    def download(cls, url: str, output_file: str, **kwargs):
+    async def download(cls, url: str, output_file: str, **kwargs):
         """Download a file.
 
         Args:
@@ -74,22 +75,22 @@ class HTTPXClient:
 
             output_file (str): Path where the file will be saved.
 
-            kwargs (dict): Extra parameters to ``http.Client.stream``.
+            kwargs (dict): Extra parameters to ``http.AsyncClient.stream``.
 
         Returns:
             str: The path to the downloaded file.
 
         See:
-            For more details about ``http.Client.stream`` options, please check
-            the official documentation: https://www.python-httpx.org/api/#client
+            For more details about ``http.AsyncClient.stream`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#asyncclient
         """
         request_args = cls._proxy_request(kwargs)
 
-        with httpx.Client(**cls._client_config) as client:
-            with client.stream("GET", url, **request_args) as response:
-                with open(output_file, "wb") as ofile:
-                    for chunk in response.aiter_bytes():
-                        ofile.write(chunk)
+        async with httpx.AsyncClient(**cls._client_config) as client:
+            async with client.stream("GET", url, **request_args) as response:
+                async with aiofiles.open(output_file, "wb") as ofile:
+                    async for chunk in response.aiter_bytes():
+                        await ofile.write(chunk)
         return output_file
 
     @staticmethod

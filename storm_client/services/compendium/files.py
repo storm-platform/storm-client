@@ -6,18 +6,21 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 import os
+from pathlib import Path
+
+import asyncio
 from pydash import py_
 
-from typing import Dict, List
+from typing import Dict, List, Union
 from typeguard import typechecked
 
 from ...network import HTTPXClient
-from ...services.base import BaseService
-from ...models.compendium import CompendiumDraft
+from .base import BaseCompendiumService
+from ...models.compendium import CompendiumBase, CompendiumDraft
 
 
 @typechecked
-class CompendiumFileService(BaseService):
+class CompendiumFileService(BaseCompendiumService):
     """Execution Compendium Files service."""
 
     def __init__(self, url: str) -> None:
@@ -97,9 +100,7 @@ class CompendiumFileService(BaseService):
                 compendium, list(files.keys()), request_options
             )
 
-        responses = {}
         compendium_files = compendium.links.files
-
         for file in compendium_files.entries:
 
             # selecting the file to upload
@@ -107,7 +108,6 @@ class CompendiumFileService(BaseService):
 
             # uploading
             response = HTTPXClient.upload("PUT", file.content_url, file_to_upload)
-            responses[file.filename] = response.status_code
 
             if commit_files:
                 response_json = response.json()
@@ -115,3 +115,62 @@ class CompendiumFileService(BaseService):
                 commit_url = py_.get(response_json, "links.commit")
                 self._create_request("POST", commit_url, **request_options or {})
         return compendium
+
+    async def _async_download_files(
+        self,
+        compendium: CompendiumBase,
+        output_directory: Union[str, Path],
+        files: List[str] = None,
+        **kwargs
+    ) -> Path:
+        """Download compendium files from the Storm WS.
+
+        Args:
+            compendium (CompendiumBase): Compendium object.
+
+            output_directory (Union[str, Path]):
+
+            files (list): A list with the filename to delete.
+
+            kwargs (dict): Extra parameters to the ``storm_client.models.compendium.files.CompendiumFiles.download``.
+
+        Returns:
+            Path: Path to the output directory.
+        """
+        output_directory = Path(output_directory)
+        output_directory.mkdir(exist_ok=True)
+
+        downloads = []
+        for file in compendium.links.files.entries:
+            if files and file.filename not in files:
+                continue
+
+            downloads.append(file.download(output_directory, **kwargs))
+        await asyncio.gather(*downloads)
+
+        return output_directory
+
+    def download_files(
+        self,
+        compendium: CompendiumBase,
+        output_directory: Union[str, Path],
+        files: List[str] = None,
+        **kwargs
+    ) -> Path:
+        """Download compendium files from the Storm WS.
+
+        Args:
+            compendium (CompendiumBase): Compendium object.
+
+            output_directory (Union[str, Path]):
+
+            files (list): A list with the filename to delete.
+
+            kwargs (dict): Extra parameters to the ``storm_client.models.compendium.files.CompendiumFiles.download``.
+
+        Returns:
+            Path: Path to the output directory.
+        """
+        return asyncio.run(
+            self._async_download_files(compendium, output_directory, files, **kwargs)
+        )

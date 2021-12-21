@@ -11,7 +11,7 @@ from cachetools import LRUCache, cached
 from typing import Dict
 from typeguard import typechecked
 
-from ...services.base import BaseService
+from .base import BaseCompendiumService
 from ...object_factory import ObjectFactory
 from ...models.compendium import (
     CompendiumRecordList,
@@ -19,7 +19,7 @@ from ...models.compendium import (
 
 
 @typechecked
-class CompendiumSearchService(BaseService):
+class CompendiumSearchService(BaseCompendiumService):
     """Execution Compendium Search service."""
 
     @cached(cache=LRUCache(maxsize=128))
@@ -50,5 +50,26 @@ class CompendiumSearchService(BaseService):
         )
 
         return ObjectFactory.resolve(
-            "CompendiumRecordList", py_.get(operation_result.json(), "hits.hits", {})
+            "CompendiumRecordList", py_.get(operation_result.json(), "hits.hits", [])
         )
+
+    def __call__(
+        self, user_records: bool = False, request_options: Dict = None, **kwargs
+    ) -> CompendiumRecordList:
+        """Search for Execution compendia.
+
+        Args:
+            user_records (bool): Flag indicating if the ``user context`` mode must be used.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+            **kwargs (dict): Search parameters.
+
+        Returns:
+            CompendiumRecordList: List with the founded Execution Compendia.
+
+        Note:
+            In the ``user context`` only the compendia created by the user is
+            available.
+        """
+        return self.search(user_records, request_options, **kwargs)
