@@ -56,7 +56,7 @@ class ProjectService(BaseService):
             Project: Created Research Project.
 
         See:
-            For more details about ``http.Client.request`` options, please check
+            For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
         operation_result = self._create_request(
@@ -74,15 +74,15 @@ class ProjectService(BaseService):
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Project: Created Research Project.
+            Project: Research Project object.
 
         See:
-            For more details about ``http.Client.request`` options, please check
+            For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        project_id_url = self._build_url(project_id)
+        operation_url = self._build_url(project_id)
         operation_result = self._create_request(
-            "GET", project_id_url, **request_options or {}
+            "GET", operation_url, **request_options or {}
         )
 
         return ObjectFactory.resolve("Project", operation_result.json())
@@ -99,12 +99,12 @@ class ProjectService(BaseService):
             Project: Updated Research Project.
 
         See:
-            For more details about ``http.Client.request`` options, please check
+            For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        project_id_url = self._build_url(project.id)
+        operation_url = self._build_url(project.id)
         operation_result = self._create_request(
-            "PUT", project_id_url, json=project, **request_options or {}
+            "PUT", operation_url, json=project, **request_options or {}
         )
 
         return ObjectFactory.resolve("Project", operation_result.json())
@@ -121,11 +121,11 @@ class ProjectService(BaseService):
             None
 
         See:
-            For more details about ``http.Client.request`` options, please check
+            For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        project_id_url = self._build_url(project_id)
-        self._create_request("DELETE", project_id_url, **request_options or {})
+        operation_url = self._build_url(project_id)
+        self._create_request("DELETE", operation_url, **request_options or {})
 
     def __call__(self, project_id: str):
         """Call a project context."""

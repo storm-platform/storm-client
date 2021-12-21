@@ -7,6 +7,7 @@
 
 from .base import BaseServiceContextAccessor
 from .compendium import CompendiumContextAccessor
+from ..services.pipeline import PipelineService
 
 
 class ProjectContextAccessor(BaseServiceContextAccessor):
@@ -19,3 +20,8 @@ class ProjectContextAccessor(BaseServiceContextAccessor):
     def compendium(self):
         """Compendium context accessor."""
         return CompendiumContextAccessor(self._url)
+
+    @property
+    def pipeline(self):
+        """Pipeline context accessor."""
+        return PipelineService(self._url)

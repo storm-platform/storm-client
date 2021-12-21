@@ -38,4 +38,5 @@ class Storm:
 
     @property
     def project(self):
+        """Storm Project entrypoint."""
         return ProjectService(self._url)

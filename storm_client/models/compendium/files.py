@@ -72,10 +72,10 @@ class CompendiumFileMetadata(BaseModel):
     @property
     def url(self):
         """File URL."""
-        return self.get_field("links.self")
+        return self.get_field("links.self") + "/" + self.filename
 
     @property
-    def content_url(self):
+    def url_content(self):
         """File content url (to download)."""
         return self.get_field("links.content")
 
@@ -91,7 +91,7 @@ class CompendiumFileMetadata(BaseModel):
                                       checksum provided by the Storm WS.
         """
         output_directory = Path(output_directory)
-        file_content_link = self.content_url
+        file_content_link = self.url_content
 
         if file_content_link:
             output_file = output_directory / self.filename

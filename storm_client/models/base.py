@@ -5,8 +5,8 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from abc import ABC
 from pydash import py_
+from abc import ABC, abstractmethod
 
 from collections import UserDict
 
@@ -30,3 +30,20 @@ class BaseModel(UserDict, ABC):
     def for_json(self):  # ``simplejson`` encoder method
         """Encode the object into a dict-like serializable object."""
         return self.data
+
+
+class VersionedModel(BaseModel):
+    """Base versioned model.
+
+    A versioned model can generate the difference
+    between the original state (defined in the
+    object initialization) and the current state.
+
+    To implement a ``VersionedModel``, you must
+    override the ``diff`` method.
+    """
+
+    @abstractmethod
+    def diff(self):
+        """Generate a difference between the original
+        state and the actual state."""

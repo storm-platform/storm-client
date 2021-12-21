@@ -42,6 +42,11 @@ class Project(BaseModel):
         """Project complete metadata."""
         return self.get_field("metadata")
 
+    @property
+    def url(self):
+        """Project URL."""
+        return self.get_field("links.self")
+
 
 class ProjectList(UserList):
     """A collection of Research projects."""

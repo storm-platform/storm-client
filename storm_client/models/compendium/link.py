@@ -5,11 +5,8 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from pydash import py_
-
 from ..base import BaseModel
-from ...network import HTTPXClient
-from ...object_factory import ObjectFactory
+from ..link import resolve_link
 
 
 class BaseCompendiumLink(BaseModel):
@@ -19,29 +16,10 @@ class BaseCompendiumLink(BaseModel):
         super(BaseCompendiumLink, self).__init__(data or {})
         self.typename = typename
 
-    def _resolve_link(self, field_path, http_method="GET", typename=None):
-        """Resolve a link into an available storm-client data class."""
-        self.has_field(field_path)
-
-        # defining the typename used to materialize
-        # the data extracted from the service.
-        typename = typename if typename else self.typename
-
-        response = HTTPXClient.request(http_method, self[field_path]).json()
-        if py_.has(response, "hits.hits"):  # for the `version` attribute
-            return [
-                ObjectFactory.resolve(typename, r)
-                for r in py_.get(response, "hits.hits")
-            ]
-
-        return ObjectFactory.resolve(typename, response)
-
     @property
     def files(self):
         """Compendium `files` link."""
-        return self._resolve_link(
-            "files", http_method="GET", typename="CompendiumFiles"
-        )
+        return resolve_link(self, "files", typename="CompendiumFiles")
 
 
 class CompendiumRecordLink(BaseCompendiumLink):
@@ -53,17 +31,17 @@ class CompendiumRecordLink(BaseCompendiumLink):
     @property
     def self(self):
         """Compendium `self` link."""
-        return self._resolve_link("self")
+        return resolve_link(self, "self", typename=self.typename)
 
     @property
     def latest(self):
         """Compendium `latest` version link."""
-        return self._resolve_link("latest")
+        return resolve_link(self, "latest", typename=self.typename)
 
     @property
     def versions(self):
         """Compendium `versions` link."""
-        return self._resolve_link("versions")
+        return resolve_link(self, "versions", typename=self.typename)
 
 
 class CompendiumDraftLink(BaseCompendiumLink):
@@ -79,4 +57,4 @@ class CompendiumDraftLink(BaseCompendiumLink):
         Note:
             In the case of Compendium Draft, the link ``draft`` is used.
         """
-        return self._resolve_link("draft")
+        return resolve_link(self, "draft", typename=self.typename)

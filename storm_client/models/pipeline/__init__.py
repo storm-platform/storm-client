@@ -5,16 +5,16 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from .model import Project, ProjectList
+from .model import Pipeline, PipelineList
 from ..factory import init_model_factory
 
 
 def init_model(factory):
     """Register the models in the object factory."""
-    init_model_factory(factory, [Project, ProjectList])
+    init_model_factory(factory, [Pipeline, PipelineList])
 
 
 __all__ = (
-    "Project",
-    "ProjectList",
+    "Pipeline",
+    "PipelineList",
 )

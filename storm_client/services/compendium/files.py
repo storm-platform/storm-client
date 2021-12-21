@@ -107,7 +107,7 @@ class CompendiumFileService(BaseCompendiumService):
             file_to_upload = files.get(file.filename)
 
             # uploading
-            response = HTTPXClient.upload("PUT", file.content_url, file_to_upload)
+            response = HTTPXClient.upload("PUT", file.url_content, file_to_upload)
 
             if commit_files:
                 response_json = response.json()

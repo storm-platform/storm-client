@@ -5,8 +5,6 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from pydash import py_
-
 from .base import CompendiumBase
 from .link import CompendiumDraftLink, CompendiumRecordLink
 from .model import CompendiumDraft, CompendiumRecord, CompendiumRecordList
@@ -17,6 +15,7 @@ from .files import (
 )
 
 from .descriptor import ExecutionDescriptor
+from ..factory import init_model_factory
 
 
 def init_model(factory):
@@ -34,8 +33,7 @@ def init_model(factory):
         CompendiumFileMetadata,
     ]
 
-    # Register each class in the factory.
-    py_.map(factory_classes, lambda cls: factory.register(cls.__name__, cls))
+    init_model_factory(factory, factory_classes)
 
 
 __all__ = (
