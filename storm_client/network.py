@@ -6,18 +6,48 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 import httpx
-import aiofiles
+from pydash import py_
 
+from .store import TokenStore
 from .io import file_chunks_generator
 
 
 class HTTPXClient:
-    @staticmethod
-    async def request(method, url, **kwargs):
-        """Asynchronous HTTP request.
 
-        Request an URL using the specified HTTP `method`.
+    _client_config = {"timeout": 12, "verify": False}
+    """Default client config."""
 
+    @classmethod
+    def _proxy_request(cls, request_options):
+        """Proxy a request to add the authentication access token."""
+
+        # proxing the request with the authentication header
+        service_access_token = TokenStore.get_token()
+
+        if service_access_token:
+            request_options = py_.merge(
+                request_options or {}, {"headers": {"x-api-key": service_access_token}}
+            )
+        return request_options
+
+    @classmethod
+    def set_client_config(cls, configuration):
+        """Define the configuration for the ``httpx.Client``.
+
+        Args:
+            configuration (dict): ``httpx.Client`` configuration
+
+        See:
+            For more details about the ``httpx.Client``, please check the
+            official documentation: https://www.python-httpx.org/api/#client
+        """
+        cls._client_config = configuration
+
+    @classmethod
+    def request(cls, method, url, **kwargs):
+        """Synchronous HTTP request.
+
+        Request an URL using the specified HTTP ``method``.
         Args:
             method (str): HTTP Method used to request (e.g. `GET`, `POST`, `PUT`, `DELETE`)
 
@@ -26,29 +56,63 @@ class HTTPXClient:
             **kwargs (dict): Extra parameters to `httpx.request` method.
 
         Returns:
-            Coroutine: coroutine to request a site.
+            httpx.Response: Request response.
 
         See:
-            This method as based on httpx.AsyncClient. Please, check the documentation for more informations: https://www.python-httpx.org/async/
-
+            This method is built on top of ``httpx``. For more details of options available, please,
+            check the official documentation: https://www.python-httpx.org/
         """
-        async with httpx.AsyncClient() as client:
-            return await client.request(method, url, **kwargs)
+        with httpx.Client(**cls._client_config) as client:
+            return client.request(method, url, **cls._proxy_request(kwargs or {}))
 
-    @staticmethod
-    async def upload(method, url, file_path, **kwargs):
-        return await HTTPXClient.request(
-            method=method, url=url, data=file_chunks_generator(file_path), **kwargs
-        )
+    @classmethod
+    def download(cls, url: str, output_file: str, **kwargs):
+        """Download a file.
 
-    @staticmethod
-    async def download(url, output_file):
-        async with httpx.AsyncClient() as client:
-            async with client.stream("GET", url) as response:
-                async with aiofiles.open(output_file, "wb") as ofile:
-                    async for chunk in response.aiter_bytes():
-                        await ofile.write(chunk)
+        Args:
+            url (str): File URL.
+
+            output_file (str): Path where the file will be saved.
+
+            kwargs (dict): Extra parameters to ``http.Client.stream``.
+
+        Returns:
+            str: The path to the downloaded file.
+
+        See:
+            For more details about ``http.Client.stream`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        request_args = cls._proxy_request(kwargs)
+
+        with httpx.Client(**cls._client_config) as client:
+            with client.stream("GET", url, **request_args) as response:
+                with open(output_file, "wb") as ofile:
+                    for chunk in response.aiter_bytes():
+                        ofile.write(chunk)
         return output_file
 
+    @staticmethod
+    def upload(method, url, file_path, **kwargs):
+        """Download a file.
 
-__all__ = "HTTPXClient"
+        Args:
+
+            method (str): HTTP verb used to upload the data.
+
+            url (str): URL to send the data.
+
+            file_path (str): File path.
+
+            kwargs (dict): Extra parameters to ``http.Client.request``.
+
+        Returns:
+            httpx.Response: Request response.
+
+        See:
+            For more details about ``http.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        return HTTPXClient.request(
+            method=method, url=url, data=file_chunks_generator(file_path), **kwargs
+        )
