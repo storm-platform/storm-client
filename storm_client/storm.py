@@ -7,22 +7,35 @@
 
 """SpatioTemporal Open Research Manager services accessor."""
 
+
+from .network import HTTPXClient
+from .store import TokenStore
 from .services.project import ProjectService
-from .services.accessor import CompendiumAccessor
 
 
 class Storm:
-    def __init__(self, url, access_token):
+    """SpatioTemporal Open Research Manager Client."""
+
+    def __init__(self, url, access_token, **client_options):
+        """Initializer.
+
+        Args:
+            url (str): Storm WS service URL.
+
+            access_token (str): Token to access the Storm WS.
+
+            client_options (dict): Optional parameters to the `httpx.Client`.
+        """
         self._url = url
-        self._access_token = access_token
+
+        # saving the token in the store.
+        # this is the only one entry point
+        # of the store.
+        TokenStore.save_token(access_token)
+
+        if client_options:
+            HTTPXClient.set_client_config(client_options)
 
     @property
     def project(self):
-        return ProjectService(self._url, self._access_token)
-
-    @property
-    def compendium(self):
-        return CompendiumAccessor(self._url, self._access_token)
-
-
-__all__ = "Storm"
+        return ProjectService(self._url)
