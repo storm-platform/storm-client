@@ -5,26 +5,15 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from pydash import py_
-
+from importlib import import_module
 from ..object_factory import ObjectFactory
 
-from ..models.project import Project
-from .compendium.files import CompendiumFiles, CompendiumFileEntry
-from .compendium.link import CompendiumDraftLink, CompendiumRecordLink
-from .compendium.model import CompendiumDraft, CompendiumRecord, CompendiumRecordList
+DATA_MODELS = [
+    "storm_client.models.project",
+    "storm_client.models.compendium",
+]
 
-FACTORY_CLASSES = {
-    "Project": Project,
-    "CompendiumDraft": CompendiumDraft,
-    "CompendiumFiles": CompendiumFiles,
-    "CompendiumRecord": CompendiumRecord,
-    "CompendiumFileEntry": CompendiumFileEntry,
-    "CompendiumDraftLink": CompendiumDraftLink,
-    "CompendiumRecordLink": CompendiumRecordLink,
-    "CompendiumRecordList": CompendiumRecordList,
-}
-
-py_.map(FACTORY_CLASSES.keys(), lambda x: ObjectFactory.register(x, FACTORY_CLASSES[x]))
-
-__all__ = "FACTORY_CLASSES"
+# initializing the models
+for module in DATA_MODELS:
+    mod = import_module(module)
+    mod.init_model(ObjectFactory)

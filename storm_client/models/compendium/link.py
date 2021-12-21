@@ -5,97 +5,78 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-import asyncio
-from collections import UserDict
-
 from pydash import py_
 
+from ..base import BaseModel
 from ...network import HTTPXClient
 from ...object_factory import ObjectFactory
 
 
-#
-# Compendium links
-#
-class CompendiumLink(UserDict):
-    def __init__(self, typename, data=None):
-        super(CompendiumLink, self).__init__(data or {})
+class BaseCompendiumLink(BaseModel):
+    """Base Compendium link class."""
 
+    def __init__(self, typename, data=None):
+        super(BaseCompendiumLink, self).__init__(data or {})
         self.typename = typename
 
-    def _check_property(self, property_path):
-        if not py_.has(self, property_path):
-            raise AttributeError(
-                f"{property_path} attribute not available for this object!"
-            )
+    def _resolve_link(self, field_path, http_method="GET", typename=None):
+        """Resolve a link into an available storm-client data class."""
+        self.has_field(field_path)
 
-    def _resolve_link(self, property_path, http_method="GET", typename=None):
-        self._check_property(property_path)
-
-        # check if the type must be forced
+        # defining the typename used to materialize
+        # the data extracted from the service.
         typename = typename if typename else self.typename
 
-        # making the request
-        response = asyncio.run(
-            HTTPXClient.request(http_method, self[property_path])
-        ).json()
-
+        response = HTTPXClient.request(http_method, self[field_path]).json()
         if py_.has(response, "hits.hits"):  # for the `version` attribute
             return [
                 ObjectFactory.resolve(typename, r)
                 for r in py_.get(response, "hits.hits")
             ]
 
-        if py_.has(response, "entries"):  # for the `files` attribute
-            response = py_.get(response, "entries")
-
         return ObjectFactory.resolve(typename, response)
 
     @property
-    def self(self):
-        return self._resolve_link("self")
-
-    @property
-    def latest(self):
-        return self._resolve_link("latest")
-
-    @property
-    def draft(self):
-        raise NotImplementedError(
-            "You must use an implementation of the `CompendiumLink` class to access this operation."
-        )
-
-    @property
-    def versions(self):
-        return self._resolve_link("versions")
-
-    @property
     def files(self):
+        """Compendium `files` link."""
         return self._resolve_link(
             "files", http_method="GET", typename="CompendiumFiles"
         )
 
 
-class CompendiumDraftLink(CompendiumLink):
-    def __init__(self, data=None):
-        super(CompendiumDraftLink, self).__init__("CompendiumDraft", data or {})
+class CompendiumRecordLink(BaseCompendiumLink):
+    """Compendium Record (Published) link class."""
 
-    @property
-    def draft(self):
-        return self._resolve_link(
-            "draft", http_method="GET", typename="CompendiumDraft"
-        )
-
-
-class CompendiumRecordLink(CompendiumLink):
     def __init__(self, data=None):
         super(CompendiumRecordLink, self).__init__("CompendiumRecord", data or {})
 
     @property
-    def draft(self):
-        return self._resolve_link(
-            "draft", http_method="POST", typename="CompendiumRecord"
-        )
+    def self(self):
+        """Compendium `self` link."""
+        return self._resolve_link("self")
+
+    @property
+    def latest(self):
+        """Compendium `latest` version link."""
+        return self._resolve_link("latest")
+
+    @property
+    def versions(self):
+        """Compendium `versions` link."""
+        return self._resolve_link("versions")
 
 
-__all__ = ("CompendiumLink", "CompendiumDraftLink", "CompendiumRecordLink")
+class CompendiumDraftLink(BaseCompendiumLink):
+    """Compendium Draft (Not published) link class."""
+
+    def __init__(self, data=None):
+        super(CompendiumDraftLink, self).__init__("CompendiumDraft", data or {})
+
+    @property
+    def self(self):
+        """Compendium `self` link.
+
+        Note:
+            In the case of Compendium Draft, the link ``draft`` is used.
+        """
+        return self._resolve_link("draft")

@@ -7,12 +7,9 @@
 
 from pydash import py_
 
-from typing import Sequence
 from collections import UserList
 
 from .type import is_draft
-from .encoder import CompendiumJSONEncoder
-
 from .base import CompendiumBase
 from .descriptor import ExecutionDescriptor
 
@@ -20,24 +17,49 @@ from .link import CompendiumDraftLink, CompendiumRecordLink
 
 
 class CompendiumDraft(CompendiumBase):
+    """Compendium draft.
+
+    In the Storm WS, a ``Draft`` is a record in the service
+    that is not published for other users. So, you should use
+    this class to handle compendium objects that are not finished
+    or have work in progress.
+    """
+
     links_cls = CompendiumDraftLink
-    serializer_cls = CompendiumJSONEncoder
     descriptor_cls = ExecutionDescriptor
+
+    @property
+    def errors(self):
+        """Compendium errors."""
+        return self.get_field("errors")
+
+    @property
+    def has_errors(self):
+        """Flag indicating if the compendium draft document has errors.."""
+        return self.errors is not None
 
 
 class CompendiumRecord(CompendiumBase):
+    """Compendium record.
+
+    In the Storm WS, a ``Record`` is a already finished and published
+    record, available for all users in a project. You can create
+    ``Record`` from ``Draft`` publishing the ``Draft``. Once create,
+    a ``Record`` can't be deleted or replaced.
+    """
+
     links_cls = CompendiumRecordLink
-    serializer_cls = CompendiumJSONEncoder
     descriptor_cls = ExecutionDescriptor
 
 
-#
-# Record Collection
-#
 class CompendiumRecordList(UserList):
+    """A collection of Compendia (Draft and Records)."""
+
     def __init__(self, data=None):
-        if not isinstance(data, Sequence):
-            raise ValueError("The `data` argument must be a valid sequence type.")
+        if not isinstance(data, (list, tuple)):
+            raise ValueError(
+                "The CompendiumRecordList `data` argument must be a valid ``tuple`` or ``list``."
+            )
 
         data = py_.map(
             data,
@@ -46,6 +68,3 @@ class CompendiumRecordList(UserList):
             else CompendiumRecord(obj),
         )
         super(CompendiumRecordList, self).__init__(data)
-
-
-__all__ = ("CompendiumDraft", "CompendiumRecord", "CompendiumRecordList")

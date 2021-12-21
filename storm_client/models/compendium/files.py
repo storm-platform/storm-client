@@ -6,87 +6,91 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 import os
-import asyncio
+from pathlib import Path
+from typing import Union
 
 from pydash import py_
-
-from typing import Dict, Union
-
 from storm_hasher import StormHasher
 
-from collections.abc import Sequence
-from collections import UserDict, UserList
-
+from ..base import BaseModel
 from ...network import HTTPXClient
 
 
-def create_file_object(filename: Union[Dict, str]) -> Dict:
-    """Create Storm records file entry.
+class CompendiumFiles(BaseModel):
+    """Compendium Files."""
 
-    Args:
-        filename (Union[Dict, str]): filename|path to file or invenio file record entry
-
-    Returns:
-        Dict: Dict with `filename` formated as Storm-WS file record entry object. The resulting object will have
-        the following format:
-
-            {
-                "key": filename
-            }
-    """
-    if isinstance(filename, str):
-        return {"key": os.path.join(filename)}
-    return filename
-
-
-def map_file_entry(data: Dict, data_path: str):
-    """Map all CompendiumBase files entry to a Invenio file record entry.
-
-    Args:
-        data (Dict): Dict with the CompendiumBase data.
-
-        data_path (str): Path to the attribute where file entries is on the `data` object.
-
-    Note:
-        The file mapping is done in-place on `data` object.
-    """
-    return py_.set(
-        data, data_path, py_.chain(data).get(data_path).map(create_file_object).value()
-    )
-
-
-#
-# Compendium files
-#
-class CompendiumFileEntry(UserDict):
     def __init__(self, data=None):
-        super(CompendiumFileEntry, self).__init__(data or {})
+        super(CompendiumFiles, self).__init__(data or {})
+
+    @property
+    def enabled(self):
+        """File entry filename."""
+        return self.get_field("enabled")
+
+    @property
+    def entries(self):
+        """Compendium file entries."""
+        return py_.map(self.get_field("entries"), CompendiumFileMetadata)
+
+
+class CompendiumFileMetadata(BaseModel):
+    """Compendium file metadata."""
+
+    def __init__(self, data=None):
+        super(CompendiumFileMetadata, self).__init__(data or {})
 
     @property
     def filename(self):
-        return py_.get(self, "key")
+        """File filename."""
+        return self.get_field("key")
+
+    @property
+    def status(self):
+        """File status.
+
+        Note:
+            The files can have two status:
+                - completed: Ingestion and checksum validation complete;
+                - pending: Is defined but the ingestion has not been done.
+        """
+        return self.get_field("status")
 
     @property
     def size(self):
-        return py_.get(self, "size")
+        """File size."""
+        return self.get_field("size")
 
     @property
     def checksum(self):
-        return py_.get(self, "checksum")
+        """File checksum (md5)."""
+        return self.get_field("checksum")
 
     @property
     def mimetype(self):
-        return py_.get(self, "mimetype")
+        """File mimetype."""
+        return self.get_field("mimetype")
+
+    @property
+    def url(self):
+        """File URL."""
+        return self.get_field("links.self")
 
     @property
     def content_url(self):
-        return py_.get(self, "links.content", None)
+        """File content url (to download)."""
+        return self.get_field("links.content")
 
-    @property
-    def commit_url(self):
-        return py_.get(self, "links.commit", None)
+    def download(
+        self, output_directory: Union[str, Path], validate_checksum: bool = False
+    ):
+        """Download the file entry content.
 
-    def download(self, output_directory, validate_checksum=False):
+        Args:
+            output_directory (Union[str, Path]): Directory where the content file will be saved.
+
+            validate_checksum (bool): Flag indicating if the file content must be validate with the
+                                      checksum provided by the Storm WS.
+        """
         file_content_link = self.content_url
 
         if file_content_link:
@@ -94,7 +98,7 @@ class CompendiumFileEntry(UserDict):
             output_file = os.path.join(output_directory, self.filename)
 
             # download!
-            asyncio.run(HTTPXClient.download(file_content_link, output_file))
+            HTTPXClient.download(file_content_link, output_file)
 
             if validate_checksum:
                 # md5 is fixed on `Storm WS`.
@@ -105,20 +109,3 @@ class CompendiumFileEntry(UserDict):
 
             return output_file
         raise FileNotFoundError("File content is not available!")
-
-
-class CompendiumFiles(UserList):
-    def __init__(self, data=None):
-        if not isinstance(data, Sequence):
-            raise ValueError("The `data` argument must be a valid sequence type.")
-
-        data = [CompendiumFileEntry(file_entry) for file_entry in py_.get(data, [])]
-        super(CompendiumFiles, self).__init__(data)
-
-
-__all__ = (
-    "CompendiumFiles",
-    "CompendiumFileEntry",
-    "map_file_entry",
-    "create_file_object",
-)

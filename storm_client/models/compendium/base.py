@@ -5,35 +5,34 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-import json
-from json import JSONEncoder
-
+import os
 from pydash import py_
 
-from .link import CompendiumLink
-from .files import map_file_entry
-from .type import is_draft, is_record
-
+from ..base import BaseModel
+from .link import BaseCompendiumLink
 from .descriptor import ExecutionDescriptor
 
-from ..base import BaseModel
+from .type import is_draft, is_record
 
 
 class CompendiumBase(BaseModel):
-    links_cls = CompendiumLink
-    serializer_cls = JSONEncoder
+    """Base class for Compendium classes."""
+
+    links_cls = BaseCompendiumLink
     descriptor_cls = ExecutionDescriptor
 
-    def __init__(self, data=None):
-        super(CompendiumBase, self).__init__(data or {})
+    def __init__(self, data=None, **kwargs):
+        super(CompendiumBase, self).__init__(data or kwargs or {})
 
     @property
     def id(self):
-        return py_.get(self.data, "id", None)
+        """Compendium id."""
+        return self.get_field("id")
 
     @property
     def title(self):
-        return py_.get(self.data, "metadata.title", None)
+        """Compendium title."""
+        return self.get_field("metadata.title")
 
     @title.setter
     def title(self, title):
@@ -41,7 +40,8 @@ class CompendiumBase(BaseModel):
 
     @property
     def description(self):
-        return py_.get(self.data, "metadata.description", None)
+        """Compendium description."""
+        return self.get_field("metadata.description")
 
     @description.setter
     def description(self, description):
@@ -49,60 +49,86 @@ class CompendiumBase(BaseModel):
 
     @property
     def inputs(self):
+        """Compendium input files."""
         _value_path = "metadata.execution.data.inputs"
-        self._default_value(_value_path, [])
+        self._set_default_value(_value_path, [])
 
-        map_file_entry(self.data, _value_path)
-        return py_.get(self.data, _value_path)
+        return self.get_field(_value_path)
 
     @property
     def outputs(self):
+        """Compendium output files."""
         _value_path = "metadata.execution.data.outputs"
-        self._default_value(_value_path, [])
+        self._set_default_value(_value_path, [])
 
-        map_file_entry(self.data, _value_path)
-        return py_.get(self.data, _value_path)
+        return self.get_field(_value_path)
 
     @property
     def descriptor(self):
+        """Compendium descriptor."""
         _value_path = "metadata.execution.environment.descriptor"
-        self._default_value(_value_path, {})
+        self._set_default_value(_value_path, {})
 
-        return self.descriptor_cls(data=py_.get(self.data, _value_path, None))
+        return self.descriptor_cls(data=self.get_field(_value_path))
 
     @descriptor.setter
     def descriptor(self, data):
-        _value_path = "metadata.execution.environment.descriptor"
-        py_.set_(self.data, _value_path, data)
+        py_.set_(self.data, "metadata.execution.environment.descriptor", data)
 
     @property
     def metadata(self):
-        _value_path = "metadata.execution.environment.meta"
-        return py_.get(self.data, _value_path, None)
+        """Compendium metadata."""
+        return self.get_field("metadata.execution.environment.meta")
 
     @metadata.setter
     def metadata(self, metadata):
-        _value_path = "metadata.execution.environment.meta"
-        py_.set_(self.data, _value_path, metadata)
+        py_.set_(self.data, "metadata.execution.environment.meta", metadata)
 
     @property
-    def errors(self):
-        return py_.get(self.data, "errors", [])
+    def url(self):
+        """Compendium URL."""
+        return self.get_field("links.self")
 
     @property
     def links(self):
+        """Compendium links."""
         return self.links_cls(py_.get(self.data, "links", None))
 
     @property
     def is_draft(self):
+        """Flag indicating if the compendium is a ``Draft``."""
         return is_draft(self.data)
 
     @property
     def is_record(self):
+        """Flag indicating if the compendium is a ``Record``."""
         return is_record(self.data)
 
-    def to_json(self):
-        return json.loads(json.dumps(self, cls=self.serializer_cls))
+    def for_json(self):  # ``simplejson`` encoder method
+        """Encode the object into a dict-like serializable object."""
 
+        # special case: in the compendia, after encoding, we need
+        # define the ``input`` and ``output`` in a special structure
+        # required by the Storm WS.
+        data = py_.clone_deep(self.data)  # cloning to avoid problems.
+        (
+            py_.chain(
+                ["metadata.execution.data.inputs", "metadata.execution.data.outputs"]
+            )
+            .map(lambda path: (path, py_.get(data, path)))
+            .map(
+                lambda args: py_.set_(
+                    data,
+                    args[0],
+                    py_.map(
+                        args[1],
+                        lambda file: {"key": os.path.join(file)}
+                        if type(file) != dict
+                        else file,
+                    ),
+                )
+            )
+            .value()
+        )
 
-__all__ = "CompendiumBase"
+        return data

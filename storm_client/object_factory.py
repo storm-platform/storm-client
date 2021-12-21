@@ -23,7 +23,4 @@ class ObjectFactory:
     def resolve(cls, datatype, data):
         if cls.exists(datatype):
             return cls._factories[datatype](data)
-        raise NotImplemented(f"Factory for {datatype} is not implemented.")
-
-
-__all__ = "ObjectFactory"
+        raise NotImplementedError(f"Factory for {datatype} is not implemented.")

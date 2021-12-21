@@ -11,11 +11,10 @@ from typing import Dict
 
 
 def is_draft(record_document: Dict):
+    """Check if the document is a draft (Not published)."""
     return not py_.get(record_document, "is_published", True)
 
 
 def is_record(record_document: Dict):
+    """Check if the document is a record (Published)."""
     return not is_draft(record_document)
-
-
-__all__ = ("is_draft", "is_record")
