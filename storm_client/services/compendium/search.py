@@ -5,7 +5,6 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from pydash import py_
 from cachetools import LRUCache, cached
 
 from typing import Dict

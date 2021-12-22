@@ -5,26 +5,23 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from typing import Dict
+from typing import Dict, Union
 
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseService
-from ..object_factory import ObjectFactory
+from .base import BaseRecordHandlerService
+from ..models.extractor import IDExtractor
 from ..models.project import Project, ProjectList
 from ..accessors.project import ProjectContextAccessor
 
 
 @typechecked
-class ProjectService(BaseService):
+class ProjectService(BaseRecordHandlerService):
     """Research Project service."""
 
     base_path = "projects"
     """Base service path in the Rest API."""
-
-    def __init__(self, url: str) -> None:
-        super(ProjectService, self).__init__(url, self.base_path)
 
     @cached(cache=LRUCache(maxsize=128))
     def search(self, request_options: Dict = None, **kwargs) -> ProjectList:
@@ -38,11 +35,7 @@ class ProjectService(BaseService):
         Returns:
             ProjectList: List with the founded Research Projects.
         """
-        operation_result = self._create_request(
-            "GET", self.url, params=kwargs, **request_options or {}
-        )
-
-        return ObjectFactory.resolve("ProjectList", operation_result.json())
+        return self._create_op_search("ProjectList", request_options, **kwargs)
 
     def create(self, project: Project, request_options: Dict = None) -> Project:
         """Create a new Research Project in the Storm WS.
@@ -59,17 +52,15 @@ class ProjectService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_result = self._create_request(
-            "POST", self.url, json=project, **request_options or {}
-        )
+        return self._create_op_create(project, "Project", request_options)
 
-        return ObjectFactory.resolve("Project", operation_result.json())
-
-    def get(self, project_id: str, request_options: Dict = None) -> Project:
+    def get(
+        self, project: Union[str, Project], request_options: Dict = None
+    ) -> Project:
         """Get an existing Research Project from Storm WS.
 
         Args:
-            project_id (str): Project ID.
+            project (Union[str, Project]): Project ID or Project object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -80,18 +71,15 @@ class ProjectService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(project_id)
-        operation_result = self._create_request(
-            "GET", operation_url, **request_options or {}
+        return self._create_op_get(
+            IDExtractor.extract(project), "Project", request_options
         )
-
-        return ObjectFactory.resolve("Project", operation_result.json())
 
     def save(self, project: Project, request_options: Dict = None) -> Project:
         """Update an existing Research Project in the Storm WS.
 
         Args:
-            project (str): Project object to be saved in the Storm WS.
+            project (Project): Project object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -102,18 +90,13 @@ class ProjectService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(project.id)
-        operation_result = self._create_request(
-            "PUT", operation_url, json=project, **request_options or {}
-        )
+        return self._create_op_save(project, "Project", request_options)
 
-        return ObjectFactory.resolve("Project", operation_result.json())
-
-    def delete(self, project_id, request_options: Dict = None):
+    def delete(self, project: Union[str, Project], request_options: Dict = None):
         """Delete an existing Research Project from Storm WS.
 
         Args:
-            project_id (str): Project ID.
+            project (Union[str, Project]): Project ID or Project object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -124,9 +107,8 @@ class ProjectService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(project_id)
-        self._create_request("DELETE", operation_url, **request_options or {})
+        return self._create_op_delete(IDExtractor.extract(project), request_options)
 
-    def __call__(self, project_id: str):
+    def __call__(self, project: Union[str, Project]):
         """Call a project context."""
-        return ProjectContextAccessor(self._build_url(project_id))
+        return ProjectContextAccessor(self._build_url(IDExtractor.extract(project)))

@@ -20,13 +20,18 @@ class IDExtractor:
         # string, is assumed that the content
         # is a valid Storm WS id.
         "str": lambda x: x,
+        "Job": lambda x: x.id,
         "Deposit": lambda x: x.id,
         "Project": lambda x: x.id,
         "Pipeline": lambda x: x.id,
+        "JobPluginService": lambda x: x.id,
         "CompendiumRecord": lambda x: x.id,
         "DepositPluginService": lambda x: x.id,
     }
 
     @classmethod
     def extract(cls, obj):
-        return cls.rules.get(obj.__class__.__name__).__call__(obj)
+        """Extract ID from object."""
+        _extract_rule = cls.rules.get(obj.__class__.__name__)
+        if _extract_rule:
+            return _extract_rule.__call__(obj)

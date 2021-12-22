@@ -8,7 +8,6 @@
 from .base import BaseCompendiumService
 
 from .compendium import (
-    BaseCompendiumHandlerService,
     CompendiumRecordService,
     CompendiumDraftService,
 )
@@ -19,7 +18,6 @@ from .search import CompendiumSearchService
 __all__ = (
     "BaseCompendiumService",
     # Compendium (itself) service
-    "BaseCompendiumHandlerService",
     "CompendiumDraftService",
     "CompendiumRecordService",
     # File service

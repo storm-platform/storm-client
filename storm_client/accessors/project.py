@@ -8,6 +8,7 @@
 from .base import BaseServiceContextAccessor
 from .compendium import CompendiumContextAccessor
 
+from ..services.job import JobService
 from ..services.deposit import DepositService
 from ..services.pipeline import PipelineService
 
@@ -32,3 +33,8 @@ class ProjectContextAccessor(BaseServiceContextAccessor):
     def deposit(self):
         """Deposit context accessor."""
         return DepositService(self._url)
+
+    @property
+    def job(self):
+        """Job context accessor."""
+        return JobService(self._url)

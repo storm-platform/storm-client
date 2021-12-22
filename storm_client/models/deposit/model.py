@@ -13,6 +13,44 @@ from ...field import DictField
 from ..extractor import IDExtractor
 
 
+class Deposit(BaseModel):
+    """Deposit model.
+
+    Deposit is a Storm WS job to send a project content
+    (Metadata and pipeline data) to a external service
+    like GEO Knowledge Hub and Zenodo.
+    """
+
+    #
+    # Data fields
+    #
+
+    status = DictField("status")
+    """Deposit status."""
+
+    pipelines = DictField("pipelines")
+    """Deposit defined pipelines."""
+
+    service = DictField("service")
+    """Deposit service."""
+
+    project = DictField("project_id")
+    """Deposit associated project."""
+
+    def __init__(self, data=None, **kwargs):
+        super(Deposit, self).__init__(data or kwargs or {})
+
+    def for_json(self):  # ``simplejson`` encoder method
+        """Encode the object into a dict-like serializable object."""
+        return py_.assign(
+            py_.clone_deep(self.data),
+            {
+                "service": IDExtractor.extract(self.service),
+                "pipelines": [IDExtractor.extract(i) for i in self.pipelines],
+            },
+        )
+
+
 class DepositPluginService(BaseModel):
     """Deposit Plugin Service model.
 
@@ -44,55 +82,6 @@ class DepositPluginService(BaseModel):
 
     def __init__(self, data=None, **kwargs):
         super(DepositPluginService, self).__init__(data or kwargs or {})
-
-
-class Deposit(BaseModel):
-    """Deposit model.
-
-    Deposit is a Storm WS job to send a project content
-    (Metadata and pipeline data) to a external service
-    like GEO Knowledge Hub and Zenodo.
-    """
-
-    #
-    # Data fields
-    #
-
-    status = DictField("status")
-    """Deposit status."""
-
-    pipelines = DictField("pipelines")
-    """Deposit defined pipelines."""
-
-    service = DictField("service")
-    """Deposit service."""
-
-    project = DictField("project_id")
-    """Deposit associated project."""
-
-    def __init__(self, data=None, **kwargs):
-        super(Deposit, self).__init__(data or kwargs or {})
-
-    def for_json(self):  # ``simplejson`` encoder method
-        """Encode the object into a dict-like serializable object."""
-
-        # When the ``customizations`` is empty, the
-        # service try validate it. To avoid these problems,
-        # we remove it from the serializations.
-        fields_to_omit = [
-            "customizations" if py_.has(self.data, "customizations") else ""
-        ]
-
-        return py_.omit(
-            py_.assign(
-                py_.clone_deep(self.data),
-                {
-                    "service": IDExtractor.extract(self.service),
-                    "pipelines": [IDExtractor.extract(i) for i in self.pipelines],
-                },
-            ),
-            fields_to_omit,
-        )
 
 
 class DepositList(UserList):

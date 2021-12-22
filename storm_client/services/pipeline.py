@@ -5,25 +5,22 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from typing import Dict
+from typing import Dict, Union
 
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseService
-from ..object_factory import ObjectFactory
+from .base import BaseRecordHandlerService
+from ..models.extractor import IDExtractor
 from ..models.pipeline.model import Pipeline, PipelineList
 
 
 @typechecked
-class PipelineService(BaseService):
+class PipelineService(BaseRecordHandlerService):
     """Research Pipeline service."""
 
     base_path = "pipelines"
     """Base service path in the Rest API."""
-
-    def __init__(self, url: str) -> None:
-        super(PipelineService, self).__init__(url, self.base_path)
 
     @cached(cache=LRUCache(maxsize=128))
     def search(self, request_options: Dict = None, **kwargs) -> PipelineList:
@@ -37,11 +34,7 @@ class PipelineService(BaseService):
         Returns:
             PipelineList: List with the founded Research Pipelines.
         """
-        operation_result = self._create_request(
-            "GET", self.url, params=kwargs, **request_options or {}
-        )
-
-        return ObjectFactory.resolve("PipelineList", operation_result.json())
+        return self._create_op_search("PipelineList", request_options, **kwargs)
 
     def create(self, pipeline: Pipeline, request_options: Dict = None) -> Pipeline:
         """Create a new Research Pipeline in the Storm WS.
@@ -58,17 +51,15 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_result = self._create_request(
-            "POST", self.url, json=pipeline, **request_options or {}
-        )
+        return self._create_op_create(pipeline, "Pipeline", request_options)
 
-        return ObjectFactory.resolve("Pipeline", operation_result.json())
-
-    def get(self, pipeline_id: str, request_options: Dict = None) -> Pipeline:
+    def get(
+        self, pipeline: Union[str, Pipeline], request_options: Dict = None
+    ) -> Pipeline:
         """Get an existing Research Pipeline from Storm WS.
 
         Args:
-            pipeline_id (str): Pipeline ID.
+            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -79,12 +70,9 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(pipeline_id)
-        operation_result = self._create_request(
-            "GET", operation_url, **request_options or {}
+        return self._create_op_get(
+            IDExtractor.extract(pipeline), "Pipeline", request_options
         )
-
-        return ObjectFactory.resolve("Pipeline", operation_result.json())
 
     def save(self, pipeline: Pipeline, request_options: Dict = None) -> Pipeline:
         """Update an existing Research Pipeline in the Storm WS.
@@ -101,18 +89,13 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(pipeline.id)
-        operation_result = self._create_request(
-            "PUT", operation_url, json=pipeline, **request_options or {}
-        )
+        return self._create_op_save(pipeline, "Pipeline", request_options)
 
-        return ObjectFactory.resolve("Pipeline", operation_result.json())
-
-    def delete(self, pipeline_id, request_options: Dict = None):
+    def delete(self, pipeline: Union[str, Pipeline], request_options: Dict = None):
         """Delete an existing Research Pipeline from Storm WS.
 
         Args:
-            pipeline_id (str): Pipeline ID.
+            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -123,18 +106,21 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        operation_url = self._build_url(pipeline_id)
-        self._create_request("DELETE", operation_url, **request_options or {})
+        return self._create_op_delete(IDExtractor.extract(pipeline), request_options)
 
     def sync_compendia(
         self,
         pipeline: Pipeline,
         request_options: Dict = None,
     ):
-        """Add an existing Research Compendium published (Record) to an Research Pipeline in the Storm WS.
+        """Synchronize a local Research Pipeline Graph with the Storm WS.
 
+        This method calculates the difference between the ``pipeline graph`` defined by the user
+        with it original version (Loaded from the server). The differences (additions and removals)
+        are synchronized.
         Args:
-            pipeline (str): Pipeline object.
+
+            pipeline (Pipeline): Pipeline object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -145,7 +131,6 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        # now, we can send them!
         diff_values = list(pipeline.diff())
 
         added = (pipeline.links.actions.add_compendium, diff_values[0][1])
@@ -157,6 +142,9 @@ class PipelineService(BaseService):
 
                 operation_url = f"{operation_base_url}/{cid}"
 
-                operation_result = self._create_request(
+                self._create_request(
                     "POST", operation_url, json=pipeline, **request_options or {}
                 )
+
+        # reload the object from the server.
+        return pipeline.links.self

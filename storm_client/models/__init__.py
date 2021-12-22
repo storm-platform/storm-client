@@ -9,6 +9,7 @@ from importlib import import_module
 from ..object_factory import ObjectFactory
 
 DATA_MODELS = [
+    "storm_client.models.job",
     "storm_client.models.project",
     "storm_client.models.deposit",
     "storm_client.models.pipeline",

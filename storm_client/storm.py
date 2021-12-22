@@ -7,16 +7,15 @@
 
 """SpatioTemporal Open Research Manager services accessor."""
 
-
-from .network import HTTPXClient
 from .store import TokenStore
+from .network import HTTPXClient
 from .services.project import ProjectService
 
 
 class Storm:
     """SpatioTemporal Open Research Manager Client."""
 
-    def __init__(self, url, access_token, **client_options):
+    def __init__(self, url, access_token, **kwargs):
         """Initializer.
 
         Args:
@@ -24,7 +23,11 @@ class Storm:
 
             access_token (str): Token to access the Storm WS.
 
-            client_options (dict): Optional parameters to the `httpx.Client`.
+            kwargs (dict): Optional parameters to the ``httpx.Client``.
+
+        See:
+            For more details about the ``httpx.Client``, please check the
+            official documentation: https://www.python-httpx.org/api/#client
         """
         self._url = url
 
@@ -33,8 +36,8 @@ class Storm:
         # of the store.
         TokenStore.save_token(access_token)
 
-        if client_options:
-            HTTPXClient.set_client_config(client_options)
+        if kwargs:
+            HTTPXClient.set_client_config(kwargs)
 
     @property
     def project(self):

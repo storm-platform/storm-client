@@ -5,13 +5,17 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
+from typing import Union, Dict
+
 from typeguard import typechecked
 
-from ...services.base import BaseService
+from ..base import BaseRecordHandlerService
+from ...models.compendium import CompendiumBase
+from ...object_factory import ObjectFactory
 
 
 @typechecked
-class BaseCompendiumService(BaseService):
+class BaseCompendiumService(BaseRecordHandlerService):
     """Base Execution Compendium service."""
 
     base_path = "compendia"
@@ -23,13 +27,29 @@ class BaseCompendiumService(BaseService):
     complement_url = ""
     """Complement URL type"""
 
-    def __init__(self, url: str) -> None:
-        """Initializer.
+    def get(
+        self, compendium_id: str, request_options: Dict = None
+    ) -> Union[CompendiumBase, None]:
+        """Get an existing Research Project from Storm WS.
 
         Args:
-            url (str): Compendia services URL.
+            compendium_id (str): Compendium ID.
 
-        Note:
-            In the ``Draft`` mode only the draft compendia is available.
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Project: Created Research Project.
+
+        See:
+            For more details about ``http.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
         """
-        super(BaseCompendiumService, self).__init__(url, self.base_path)
+        # building the request url
+        operation_url = self._build_url([compendium_id, self.complement_url])
+
+        # get the defined compendia
+        operation_result = self._create_request(
+            "GET", operation_url, **request_options or {}
+        )
+
+        return ObjectFactory.resolve(self.compendium_type, operation_result.json())

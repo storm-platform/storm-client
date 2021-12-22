@@ -69,11 +69,6 @@ class CompendiumFileMetadata(BaseModel):
     url_content = DictField("links.content")
     """URL to download the file content."""
 
-    @property
-    def url(self):  # temp
-        """File URL."""
-        return self.get_field("links.self") + "/" + self.filename
-
     def __init__(self, data=None):
         super(CompendiumFileMetadata, self).__init__(data or {})
 

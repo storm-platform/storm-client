@@ -12,20 +12,20 @@ from cachetools import LRUCache, cached
 
 from .base import BaseRecordHandlerService
 from ..models.extractor import IDExtractor
+from ..models.job.model import JobList, Job
 from ..object_factory import ObjectFactory
-from ..models.deposit import DepositList, Deposit
 
 
 @typechecked
-class DepositService(BaseRecordHandlerService):
+class JobService(BaseRecordHandlerService):
     """Deposit service."""
 
-    base_path = "deposits"
+    base_path = "jobs"
     """Base service path in the Rest API."""
 
     @cached(cache=LRUCache(maxsize=128))
-    def search(self, request_options: Dict = None, **kwargs) -> DepositList:
-        """Search for deposits in the Storm WS.
+    def search(self, request_options: Dict = None, **kwargs) -> JobList:
+        """Search for jobs in the Storm WS.
 
         Args:
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
@@ -33,70 +33,66 @@ class DepositService(BaseRecordHandlerService):
             **kwargs (dict): Search parameters.
 
         Returns:
-            DepositList: List with the founded Deposits.
+            JobList: List with the founded Jobs.
         """
-        return self._create_op_search("DepositList", request_options, **kwargs)
+        return self._create_op_search("JobList", request_options, **kwargs)
 
-    def create(self, deposit: Deposit, request_options: Dict = None) -> Deposit:
-        """Create a new Deposit request in the Storm WS.
+    def create(self, job: Job, request_options: Dict = None) -> Job:
+        """Create a new Execution Job in the Storm WS.
 
         Args:
-            deposit (Deposit): Deposit object to be created in the Storm WS.
+            job (Deposit): Job object to be created in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Deposit: Created Deposit request.
+            Job: Created Job request.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_create(deposit, "Deposit", request_options)
+        return self._create_op_create(job, "Job", request_options)
 
-    def get(
-        self, deposit: Union[str, Deposit], request_options: Dict = None
-    ) -> Deposit:
-        """Get an existing Deposit request from Storm WS.
+    def get(self, job: Union[str, Job], request_options: Dict = None) -> Job:
+        """Get an existing Execution Job from Storm WS.
 
         Args:
-            deposit (str):  Deposit ID or Deposit object.
+            job (Union[str, Job]): Job ID or Job record.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Deposit: Deposit object.
+            Job: Job object.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_get(
-            IDExtractor.extract(deposit), "Deposit", request_options
-        )
+        return self._create_op_get(IDExtractor.extract(job), "Job", request_options)
 
-    def save(self, deposit: Deposit, request_options: Dict = None) -> Deposit:
-        """Update an existing Deposit request in the Storm WS.
+    def save(self, job: Job, request_options: Dict = None) -> Job:
+        """Update an existing Execution Job in the Storm WS.
 
         Args:
-            deposit (Deposit): Deposit object to be saved in the Storm WS.
+            job (Job): Job object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Deposit: Updated Deposit request.
+            Job: Updated Execution Job.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_save(deposit, "Deposit", request_options)
+        return self._create_op_save(job, "Job", request_options)
 
-    def delete(self, deposit: Union[str, Deposit], request_options: Dict = None):
-        """Delete an existing Deposit request from the Storm WS.
+    def delete(self, job: Union[str, Job], request_options: Dict = None):
+        """Delete an existing Execution Job from the Storm WS.
 
         Args:
-            deposit (Union[str, Deposit]): Deposit ID or Deposit object.
+            job (Union[str, Job]): Job ID or Job record.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -107,20 +103,20 @@ class DepositService(BaseRecordHandlerService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_delete(IDExtractor.extract(deposit), request_options)
+        return self._create_op_delete(IDExtractor.extract(job), request_options)
 
     def list_services(self, request_options: Dict = None):
-        """List all available deposit services.
+        """List all jobs services available.
 
         Args:
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            DepositServiceList: List with the founded Deposits services.
+            JobServiceList: List with the founded Job services.
         """
         operation_url = self._build_url("services")
         operation_result = self._create_request(
             "GET", operation_url, **request_options or {}
         )
 
-        return ObjectFactory.resolve("DepositServiceList", operation_result.json())
+        return ObjectFactory.resolve("JobServiceList", operation_result.json())
