@@ -8,7 +8,9 @@
 from pydash import py_
 
 from collections import UserList
-from storm_client.models.base import BaseModel
+
+from ..base import BaseModel
+from ...field import DictField
 
 
 class Project(BaseModel):
@@ -19,47 +21,36 @@ class Project(BaseModel):
     ``people``, ``data``, ``software``.
     """
 
+    #
+    # Data fields
+    #
+
+    # General informations
+    is_finished = DictField("is_finished")
+    """Flag indicating if the pipeline is finished."""
+
+    revision_id = DictField("revision_id")
+    """Revision ID."""
+
+    # Metadata
+    metadata = DictField("metadata")
+    """Complete Project metadata."""
+
+    title = DictField("metadata.title")
+    """Project title (From metadata)."""
+
+    description = DictField("metadata.description")
+    """Project description (From metadata)."""
+
     def __init__(self, data=None, **kwargs):
         super(Project, self).__init__(data or kwargs or {})
-
-    @property
-    def id(self):
-        """Project id."""
-        return self.get_field("id")
-
-    @property
-    def title(self):
-        """Project title."""
-        return self.get_field("metadata.title")
-
-    @property
-    def description(self):
-        """Project description."""
-        return self.get_field("metadata.description")
-
-    @property
-    def metadata(self):
-        """Project complete metadata."""
-        return self.get_field("metadata")
-
-    @property
-    def url(self):
-        """Project URL."""
-        return self.get_field("links.self")
 
 
 class ProjectList(UserList):
     """A collection of Research projects."""
 
     def __init__(self, data=None):
-        # fixme: this is in the wrong place.
-        if py_.has(data, "hits.hits"):  # elasticsearch specific result format
+        if py_.has(data, "hits.hits"):
             data = py_.get(data, "hits.hits")
 
-        if not isinstance(data, (list, tuple)):
-            raise ValueError(
-                "The `data` argument must be a valid ``list`` or ``tuple`` type."
-            )
-
-        data = py_.map(data, lambda obj: Project(obj))
-        super(ProjectList, self).__init__(data)
+        super(ProjectList, self).__init__(py_.map(data, lambda obj: Project(obj)))

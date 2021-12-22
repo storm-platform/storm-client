@@ -10,8 +10,9 @@ import difflib
 from pydash import py_
 from collections import UserList
 
+from ...field import DictField, ObjectField
 from ..base import VersionedModel
-from ..compendium import CompendiumRecord
+from ..extractor import IDExtractor
 
 
 class Pipeline(VersionedModel):
@@ -23,38 +24,34 @@ class Pipeline(VersionedModel):
     is a Record Compendium (Published in the project).
     """
 
-    def __init__(self, data=None, **kwargs):
-        super(Pipeline, self).__init__(data or kwargs or {})
+    #
+    # Data fields
+    #
 
-        # saving the original state of the
-        # compendia available in the graph.
-        self._original_state = list(self.get_field("graph.nodes", {}).keys())
-        self._current_state = self._original_state.copy()
+    # General informations.
+    is_finished = DictField("is_finished")
+    """Flag indicating if the pipeline is finished."""
 
-    @property
-    def id(self):
-        """Pipeline ID."""
-        return self.get_field("id")
+    # Metadata.
+    metadata = DictField("metadata")
+    """Complete pipeline metadata."""
 
-    @property
-    def is_finished(self):
-        """Pipeline ID."""
-        return self.get_field("is_finished")
+    title = DictField("metadata.title")
+    """Pipeline title (From metadata)."""
 
-    @property
-    def title(self):
-        """Pipeline title."""
-        return self.get_field("metadata.title")
+    description = DictField("metadata.description")
+    """Pipeline description (From metadata)."""
 
-    @property
-    def description(self):
-        """Pipeline description."""
-        return self.get_field("metadata.description")
+    version = DictField("metadata.version")
+    """Pipeline version (From metadata)."""
 
-    @property
-    def version(self):
-        """Pipeline version."""
-        return self.get_field("metadata.version")
+    # Compendium graph data.
+    graph = DictField("metadata.graph")
+    """Pipeline graph."""
+
+    # Links
+    links = ObjectField("links", "PipelineLink")
+    """Compendium draft links."""
 
     @property
     def compendia(self):
@@ -65,15 +62,13 @@ class Pipeline(VersionedModel):
     def compendia(self, compendia):
         self._current_state = compendia
 
-    @property
-    def metadata(self):
-        """Pipeline full metadata."""
-        return self.get_field("metadata")
+    def __init__(self, data=None, **kwargs):
+        super(Pipeline, self).__init__(data or kwargs or {})
 
-    @property
-    def graph(self):
-        """Pipeline graph."""
-        return self.get_field("graph")
+        # saving the original state of the
+        # compendia available in the graph.
+        self._original_state = list(self.get_field("graph.nodes", {}).keys())
+        self._current_state = self._original_state.copy()
 
     def diff(self):
         """Generate a difference between the original
@@ -81,19 +76,12 @@ class Pipeline(VersionedModel):
         added = []
         removed = []
 
-        # mutation: before start, we will transform all
-        # compendia values in valid string ``id``.
-        extractors = {
-            str: lambda x: x,
-            CompendiumRecord: lambda x: x.id,
-        }
-
         # before start, let's validate the types:
         compendia_types = (
             py_.chain([self._current_state, self._original_state])
             .flatten()
-            .map(lambda x: type(x))
-            .filter(lambda x: x not in extractors)
+            .map(lambda x: x.__class__.__name__)
+            .filter(lambda x: x not in IDExtractor.rules)
             .value()
         )
         if compendia_types:
@@ -101,13 +89,9 @@ class Pipeline(VersionedModel):
                 "Invalid Compendia! You can only define a pipeline compendia using ``str`` and ``CompendiumRecord``"
             )
 
-        # now, we can handle the states
-        _current_state = py_.map(
-            self._current_state, lambda x: extractors.get(type(x))(x)
-        )
-        _original_state = py_.map(
-            self._original_state, lambda x: extractors.get(type(x))(x)
-        )
+        # handle the available objects.
+        _current_state = py_.map(self._current_state, IDExtractor.extract)
+        _original_state = py_.map(self._original_state, IDExtractor.extract)
 
         # matcher
         matcher = difflib.SequenceMatcher(None, _original_state, _current_state)
@@ -145,14 +129,7 @@ class PipelineList(UserList):
     """A collection of Research pipelines."""
 
     def __init__(self, data=None):
-        # fixme: this is in the wrong place.
-        if py_.has(data, "hits.hits"):  # elasticsearch specific result format
+        if py_.has(data, "hits.hits"):
             data = py_.get(data, "hits.hits")
 
-        if not isinstance(data, (list, tuple)):
-            raise ValueError(
-                "The `data` argument must be a valid ``list`` or ``tuple`` type."
-            )
-
-        data = py_.map(data, lambda obj: Pipeline(obj))
-        super(PipelineList, self).__init__(data)
+        super(PipelineList, self).__init__(py_.map(data, lambda obj: Pipeline(obj)))

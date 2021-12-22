@@ -10,9 +10,29 @@ from abc import ABC, abstractmethod
 
 from collections import UserDict
 
+from ..field import DictField
+
 
 class BaseModel(UserDict, ABC):
     """Base class for the storm-client data models."""
+
+    #
+    # Base data fields
+    #
+
+    # General informations
+    id = DictField("id")
+    """Object ID in the service."""
+
+    # Date
+    updated = DictField("updated")
+    """Last update date."""
+
+    created = DictField("created")
+    """Creation date."""
+
+    url = DictField("links.self")
+    """Link to this object in the service."""
 
     def _set_default_value(self, property_path, value):
         """Define default values in the ``UserDict.data`` attribute."""

@@ -90,7 +90,7 @@ class PipelineService(BaseService):
         """Update an existing Research Pipeline in the Storm WS.
 
         Args:
-            pipeline (str): Pipeline object to be saved in the Storm WS.
+            pipeline (Pipeline): Pipeline object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -145,23 +145,18 @@ class PipelineService(BaseService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        # Fixme: We need do a review in the client link classes.
-        add_compendium_url = pipeline.get_field("links.actions.add-compendium")
-        remove_compendium_url = pipeline.get_field("links.actions.delete-compendium")
-
         # now, we can send them!
         diff_values = list(pipeline.diff())
 
-        added = (add_compendium_url, diff_values[0][1])
-        removed = (remove_compendium_url, diff_values[1][1])
+        added = (pipeline.links.actions.add_compendium, diff_values[0][1])
+        removed = (pipeline.links.actions.delete_compendium, diff_values[1][1])
 
         # adding/removing compendia from the Storm WS
-        # (order matter! Remove first!)
-        for operation_base_url, compendia_list in [added, removed]:
+        for operation_base_url, compendia_list in [removed, added]:
             for cid in compendia_list:
+
                 operation_url = f"{operation_base_url}/{cid}"
+
                 operation_result = self._create_request(
                     "POST", operation_url, json=pipeline, **request_options or {}
                 )
-
-                print(operation_result.json())

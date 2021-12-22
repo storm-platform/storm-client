@@ -8,76 +8,74 @@
 from pathlib import Path
 from typing import Union
 
-from pydash import py_
 from storm_hasher import StormHasher
 
 from ..base import BaseModel
 from ...network import HTTPXClient
+from ...field import DictField, ObjectCollectionField
 
 
 class CompendiumFiles(BaseModel):
     """Compendium Files."""
 
+    enabled = DictField("enabled")
+    """Flag indicating if file is enabled."""
+
+    entries = ObjectCollectionField("entries", "CompendiumFileMetadata")
+    """Compendium file entries."""
+
     def __init__(self, data=None):
         super(CompendiumFiles, self).__init__(data or {})
-
-    @property
-    def enabled(self):
-        """File entry filename."""
-        return self.get_field("enabled")
-
-    @property
-    def entries(self):
-        """Compendium file entries."""
-        return py_.map(self.get_field("entries"), CompendiumFileMetadata)
 
 
 class CompendiumFileMetadata(BaseModel):
     """Compendium file metadata."""
 
-    def __init__(self, data=None):
-        super(CompendiumFileMetadata, self).__init__(data or {})
+    #
+    # Data fields
+    #
+
+    # General informations
+    id = DictField("file_id")
+    """File ID."""
+
+    filename = DictField("key")
+    """Filename."""
+
+    version_id = DictField("version_id")
+    """File version ID."""
+
+    # Metadata
+    size = DictField("size")
+    """File size (in bytes)."""
+
+    mimetype = DictField("mimetype")
+    """File mimetype."""
+
+    checksum = DictField("checksum")
+    """File checksum (md5)."""
+
+    status = DictField("status")
+    """The files can have two status:
+            - completed: Ingestion and checksum validation complete;
+            - pending: Is defined but the ingestion has not been done.
+    """
+
+    # Bucket
+    bucket_id = DictField("bucket_id")
+    """File bucket where is stored in the service."""
+
+    # Links
+    url_content = DictField("links.content")
+    """URL to download the file content."""
 
     @property
-    def filename(self):
-        """File filename."""
-        return self.get_field("key")
-
-    @property
-    def status(self):
-        """File status.
-
-        Note:
-            The files can have two status:
-                - completed: Ingestion and checksum validation complete;
-                - pending: Is defined but the ingestion has not been done.
-        """
-        return self.get_field("status")
-
-    @property
-    def size(self):
-        """File size."""
-        return self.get_field("size")
-
-    @property
-    def checksum(self):
-        """File checksum (md5)."""
-        return self.get_field("checksum")
-
-    @property
-    def mimetype(self):
-        """File mimetype."""
-        return self.get_field("mimetype")
-
-    @property
-    def url(self):
+    def url(self):  # temp
         """File URL."""
         return self.get_field("links.self") + "/" + self.filename
 
-    @property
-    def url_content(self):
-        """File content url (to download)."""
-        return self.get_field("links.content")
+    def __init__(self, data=None):
+        super(CompendiumFileMetadata, self).__init__(data or {})
 
     async def download(
         self, output_directory: Union[str, Path], validate_checksum: bool = False

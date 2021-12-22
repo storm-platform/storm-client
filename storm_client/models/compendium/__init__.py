@@ -31,6 +31,7 @@ def init_model(factory):
         CompendiumRecordLink,
         CompendiumRecordList,
         CompendiumFileMetadata,
+        ExecutionDescriptor,
     ]
 
     init_model_factory(factory, factory_classes)

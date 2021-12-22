@@ -9,90 +9,64 @@ import os
 from pydash import py_
 
 from ..base import BaseModel
-from .link import BaseCompendiumLink
-from .descriptor import ExecutionDescriptor
 
 from .type import is_draft, is_record
+from ...field import DictField, ObjectField, LinkField
 
 
 class CompendiumBase(BaseModel):
     """Base class for Compendium classes."""
 
-    links_cls = BaseCompendiumLink
-    descriptor_cls = ExecutionDescriptor
+    #
+    # Data fields
+    #
+
+    # General informations
+    versions = DictField("versions")
+    """Versions dictionary."""
+
+    revision_id = DictField("revision_id")
+    """Revision ID."""
+
+    is_published = DictField("is_published")
+    """Flag indicating if the record is published."""
+
+    parent = DictField("parent.id")
+    """Parent ID."""
+
+    # Metadata
+    metadata = DictField("metadata")
+    """Complete compendium metadata."""
+
+    title = DictField("metadata.title")
+    """Compendium title (From metadata)."""
+
+    description = DictField("metadata.description")
+    """Compendium description (From metadata)."""
+
+    # Execution metadata
+    inputs = DictField("metadata.execution.data.inputs", [])
+    """Compendium execution input files."""
+
+    outputs = DictField("metadata.execution.data.outputs", [])
+    """Compendium execution output files."""
+
+    environment = DictField("metadata.execution.environment", {})
+    """Compendium execution environment complete metadata."""
+
+    environment_metadata = DictField("metadata.execution.environment.meta")
+    """Complete environment metadata."""
+
+    environment_descriptor = ObjectField(
+        "metadata.execution.environment.descriptor", "ExecutionDescriptor"
+    )
+    """Compendium execution environment descriptor metadata."""
+
+    # Links
+    links = LinkField("links", "BaseCompendiumLink")
 
     def __init__(self, data=None, **kwargs):
         super(CompendiumBase, self).__init__(data or kwargs or {})
-
-    @property
-    def id(self):
-        """Compendium id."""
-        return self.get_field("id")
-
-    @property
-    def title(self):
-        """Compendium title."""
-        return self.get_field("metadata.title")
-
-    @title.setter
-    def title(self, title):
-        py_.set_(self.data, "metadata.title", title)
-
-    @property
-    def description(self):
-        """Compendium description."""
-        return self.get_field("metadata.description")
-
-    @description.setter
-    def description(self, description):
-        py_.set_(self.data, "metadata.description", description)
-
-    @property
-    def inputs(self):
-        """Compendium input files."""
-        _value_path = "metadata.execution.data.inputs"
-        self._set_default_value(_value_path, [])
-
-        return self.get_field(_value_path)
-
-    @property
-    def outputs(self):
-        """Compendium output files."""
-        _value_path = "metadata.execution.data.outputs"
-        self._set_default_value(_value_path, [])
-
-        return self.get_field(_value_path)
-
-    @property
-    def descriptor(self):
-        """Compendium descriptor."""
-        _value_path = "metadata.execution.environment.descriptor"
-        self._set_default_value(_value_path, {})
-
-        return self.descriptor_cls(data=self.get_field(_value_path))
-
-    @descriptor.setter
-    def descriptor(self, data):
-        py_.set_(self.data, "metadata.execution.environment.descriptor", data)
-
-    @property
-    def metadata(self):
-        """Compendium metadata."""
-        return self.get_field("metadata.execution.environment.meta")
-
-    @metadata.setter
-    def metadata(self, metadata):
-        py_.set_(self.data, "metadata.execution.environment.meta", metadata)
-
-    @property
-    def url(self):
-        """Compendium URL."""
-        return self.get_field("links.self")
-
-    @property
-    def links(self):
-        """Compendium links."""
-        return self.links_cls(py_.get(self.data, "links", None))
 
     @property
     def is_draft(self):

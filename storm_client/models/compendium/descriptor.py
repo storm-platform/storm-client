@@ -6,6 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 from ..base import BaseModel
+from ...field import DictField
 
 
 class ExecutionDescriptor(BaseModel):
@@ -17,30 +18,25 @@ class ExecutionDescriptor(BaseModel):
 
     By default, an ``Execution Descriptor`` must define a metadata
     with the following properties:
-        - name;
         - uri;
+        - name;
         - version.
 
     Also, other fields can be added.
     """
 
+    #
+    # Data fields
+    #
+
+    uri = DictField("uri")
+    """Descriptor URI."""
+
+    name = DictField("name")
+    """Descriptor name."""
+
+    version = DictField("version")
+    """Descriptor version."""
+
     def __init__(self, **kwargs):
         super(ExecutionDescriptor, self).__init__(kwargs or {})
-
-    @property
-    def name(self):
-        """Execution descriptor name."""
-        return self.get_field("name")
-
-    @property
-    def uri(self):
-        """Execution descriptor URI."""
-        return self.get_field("uri")
-
-    @property
-    def version(self):
-        """Execution descriptor version."""
-        return self.get_field("version")
-
-    def for_json(self):
-        return self.data

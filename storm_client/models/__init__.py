@@ -10,6 +10,7 @@ from ..object_factory import ObjectFactory
 
 DATA_MODELS = [
     "storm_client.models.project",
+    "storm_client.models.deposit",
     "storm_client.models.pipeline",
     "storm_client.models.compendium",
 ]

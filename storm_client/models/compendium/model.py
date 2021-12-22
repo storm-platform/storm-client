@@ -11,9 +11,8 @@ from collections import UserList
 
 from .type import is_draft
 from .base import CompendiumBase
-from .descriptor import ExecutionDescriptor
 
-from .link import CompendiumDraftLink, CompendiumRecordLink
+from ...field import ObjectField, DictField
 
 
 class CompendiumDraft(CompendiumBase):
@@ -25,13 +24,15 @@ class CompendiumDraft(CompendiumBase):
     or have work in progress.
     """
 
-    links_cls = CompendiumDraftLink
-    descriptor_cls = ExecutionDescriptor
+    #
+    # Data fields
+    #
 
-    @property
-    def errors(self):
-        """Compendium errors."""
-        return self.get_field("errors")
+    errors = DictField("errors", [])
+    """Compendium draft errors (in the submitted document)."""
+
+    links = ObjectField("links", "CompendiumDraftLink")
+    """Compendium draft links."""
 
     @property
     def has_errors(self):
@@ -48,23 +49,26 @@ class CompendiumRecord(CompendiumBase):
     a ``Record`` can't be deleted or replaced.
     """
 
-    links_cls = CompendiumRecordLink
-    descriptor_cls = ExecutionDescriptor
+    #
+    # Data fields
+    #
+
+    links = ObjectField("links", "CompendiumRecordLink")
+    """Compendium record links."""
 
 
 class CompendiumRecordList(UserList):
     """A collection of Compendia (Draft and Records)."""
 
     def __init__(self, data=None):
-        if not isinstance(data, (list, tuple)):
-            raise ValueError(
-                "The CompendiumRecordList `data` argument must be a valid ``tuple`` or ``list``."
-            )
+        if py_.has(data, "hits.hits"):
+            data = py_.get(data, "hits.hits")
 
-        data = py_.map(
-            data,
-            lambda obj: CompendiumDraft(obj)
-            if is_draft(obj)
-            else CompendiumRecord(obj),
+        super(CompendiumRecordList, self).__init__(
+            py_.map(
+                data,
+                lambda obj: CompendiumDraft(obj)
+                if is_draft(obj)
+                else CompendiumRecord(obj),
+            )
         )
-        super(CompendiumRecordList, self).__init__(data)

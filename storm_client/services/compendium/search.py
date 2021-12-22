@@ -49,9 +49,7 @@ class CompendiumSearchService(BaseCompendiumService):
             "GET", operation_url, params=kwargs, **request_options or {}
         )
 
-        return ObjectFactory.resolve(
-            "CompendiumRecordList", py_.get(operation_result.json(), "hits.hits", [])
-        )
+        return ObjectFactory.resolve("CompendiumRecordList", operation_result.json())
 
     def __call__(
         self, user_records: bool = False, request_options: Dict = None, **kwargs
