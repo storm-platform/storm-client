@@ -10,14 +10,14 @@ from typing import Dict, Union
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseRecordHandlerService
+from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
-from ..models.job.model import JobList, Job
 from ..object_factory import ObjectFactory
+from ..models.job.model import JobList, Job
 
 
 @typechecked
-class JobService(BaseRecordHandlerService):
+class JobService(RecordOperatorService):
     """Deposit service."""
 
     base_path = "jobs"
@@ -120,3 +120,45 @@ class JobService(BaseRecordHandlerService):
         )
 
         return ObjectFactory.resolve("JobServiceList", operation_result.json())
+
+    def start_job(self, job: Union[str, Job], request_options: Dict = None):
+        """Start an existing Execution Job in the Storm WS.
+
+        Args:
+            job (Union[str, Job]): Job ID or Job object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Job: Updated Execution Job.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(job), "actions/start", "POST", request_options
+        )
+
+        return self.get(job)
+
+    def cancel_job(self, job: Union[str, Job], request_options: Dict = None):
+        """Cancel an Execution Job (In execution) in the Storm WS.
+
+        Args:
+            job (Union[str, Job]): Job ID or Job object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Job: Updated Execution Job.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(job), "actions/cancel", "POST", request_options
+        )
+
+        return self.get(job)

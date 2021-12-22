@@ -9,13 +9,13 @@ from typing import Union, Dict
 
 from typeguard import typechecked
 
-from ..base import BaseRecordHandlerService
+from ..base import RecordHandlerService
 from ...models.compendium import CompendiumBase
 from ...object_factory import ObjectFactory
 
 
 @typechecked
-class BaseCompendiumService(BaseRecordHandlerService):
+class BaseCompendiumService(RecordHandlerService):
     """Base Execution Compendium service."""
 
     base_path = "compendia"

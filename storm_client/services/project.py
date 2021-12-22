@@ -10,14 +10,14 @@ from typing import Dict, Union
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseRecordHandlerService
+from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
 from ..models.project import Project, ProjectList
 from ..accessors.project import ProjectContextAccessor
 
 
 @typechecked
-class ProjectService(BaseRecordHandlerService):
+class ProjectService(RecordOperatorService):
     """Research Project service."""
 
     base_path = "projects"
@@ -93,7 +93,7 @@ class ProjectService(BaseRecordHandlerService):
         return self._create_op_save(project, "Project", request_options)
 
     def delete(self, project: Union[str, Project], request_options: Dict = None):
-        """Delete an existing Research Project from Storm WS.
+        """Delete an existing Research Project in the Storm WS.
 
         Args:
             project (Union[str, Project]): Project ID or Project object.
@@ -108,6 +108,27 @@ class ProjectService(BaseRecordHandlerService):
             the official documentation: https://www.python-httpx.org/api/#client
         """
         return self._create_op_delete(IDExtractor.extract(project), request_options)
+
+    def finalize(self, project: Union[str, Project], request_options: Dict = None):
+        """Finalize an existing Research Project in the Storm WS.
+
+        Args:
+            project (Union[str, Project]): Project ID or Project object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Project: Updated Research Project.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(project), "actions/finish", "POST", request_options
+        )
+
+        return self.get(project)
 
     def __call__(self, project: Union[str, Project]):
         """Call a project context."""

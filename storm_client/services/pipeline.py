@@ -10,13 +10,13 @@ from typing import Dict, Union
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseRecordHandlerService
+from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
 from ..models.pipeline.model import Pipeline, PipelineList
 
 
 @typechecked
-class PipelineService(BaseRecordHandlerService):
+class PipelineService(RecordOperatorService):
     """Research Pipeline service."""
 
     base_path = "pipelines"
@@ -106,7 +106,7 @@ class PipelineService(BaseRecordHandlerService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_delete(IDExtractor.extract(pipeline), request_options)
+        self._create_op_delete(IDExtractor.extract(pipeline), request_options)
 
     def sync_compendia(
         self,
@@ -148,3 +148,24 @@ class PipelineService(BaseRecordHandlerService):
 
         # reload the object from the server.
         return pipeline.links.self
+
+    def finalize(self, pipeline: Union[str, Pipeline], request_options: Dict = None):
+        """Finalize an existing Research Pipeline in the Storm WS.
+
+        Args:
+            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Pipeline: Updated Research Pipeline.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(pipeline), "actions/finish", "POST", request_options
+        )
+
+        return self.get(pipeline)

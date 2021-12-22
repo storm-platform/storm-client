@@ -10,14 +10,14 @@ from typing import Dict, Union
 from typeguard import typechecked
 from cachetools import LRUCache, cached
 
-from .base import BaseRecordHandlerService
+from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
 from ..object_factory import ObjectFactory
 from ..models.deposit import DepositList, Deposit
 
 
 @typechecked
-class DepositService(BaseRecordHandlerService):
+class DepositService(RecordOperatorService):
     """Deposit service."""
 
     base_path = "deposits"
@@ -124,3 +124,47 @@ class DepositService(BaseRecordHandlerService):
         )
 
         return ObjectFactory.resolve("DepositServiceList", operation_result.json())
+
+    def start_deposit(self, deposit: Union[str, Deposit], request_options: Dict = None):
+        """Start an existing Deposit in the Storm WS.
+
+        Args:
+            deposit (Union[str, Deposit]): Deposit ID or Deposit object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Deposit: Updated Deposit.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(deposit), "actions/start", "POST", request_options
+        )
+
+        return self.get(deposit)
+
+    def cancel_deposit(
+        self, deposit: Union[str, Deposit], request_options: Dict = None
+    ):
+        """Cancel an existing Deposit (In progress) in the Storm WS.
+
+        Args:
+            deposit (Union[str, Deposit]): Deposit ID or Deposit object.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            Deposit: Updated Deposit.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        self._create_op_action(
+            IDExtractor.extract(deposit), "actions/cancel", "POST", request_options
+        )
+
+        return self.get(deposit)

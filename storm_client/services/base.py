@@ -60,21 +60,21 @@ class BaseService:
         return response
 
 
-class BaseRecordHandlerService(BaseService):
-    """Base record service for record handle in the Storm WS.
+class RecordHandlerService(BaseService):
+    """Record handle service.
 
-    This class provides useful methods to manipulate records
-    in the Storm WS.
+    This class provides useful methods to manipulate record
+    data in the Storm WS.
     """
 
     def __init__(self, url: str) -> None:
-        super(BaseRecordHandlerService, self).__init__(url, self.base_path)
+        super(RecordHandlerService, self).__init__(url, self.base_path)
 
     def _create_data_handle_request(
         self,
         data: BaseModel,
         link_path: str,
-        method: str,
+        method: str = "GET",
         request_options: Dict = None,
     ):
         """Create a request record data handle.
@@ -104,6 +104,18 @@ class BaseRecordHandlerService(BaseService):
         )
 
         return operation_result.json()
+
+
+class RecordOperatorService(BaseService):
+    """Record operator service.
+
+    This class provides methods to use the base
+    record operations (CRUD and actions) provided
+    by the Storm WS.
+    """
+
+    def __init__(self, url: str) -> None:
+        super(RecordOperatorService, self).__init__(url, self.base_path)
 
     def _create_op_search(
         self, result_type: str, request_options: Dict = None, **kwargs
@@ -208,3 +220,29 @@ class BaseRecordHandlerService(BaseService):
         """
         operation_url = self._build_url(record_id)
         self._create_request("DELETE", operation_url, **request_options or {})
+
+    def _create_op_action(
+        self, record_id, action_path: str, method: str, request_options: Dict = None
+    ) -> Dict:
+        """Use and action provided for a record in the Storm WS.
+
+        Args:
+            record_id (str): Record ID.
+
+            action_path (str): Path to the action.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            ``result_type``: Record object.
+
+        See:
+            For more details about ``httpx.Client.request`` options, please check
+            the official documentation: https://www.python-httpx.org/api/#client
+        """
+        operation_url = self._build_url([record_id, action_path])
+
+        # is assumed that an action don't return a object.
+        return self._create_request(
+            method, operation_url, **request_options or {}
+        ).json()
