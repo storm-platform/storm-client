@@ -43,3 +43,13 @@ class Storm:
     def project(self):
         """Storm Project entrypoint."""
         return ProjectService(self._url)
+
+    @property
+    def is_connected(self):
+        """Check connection with the Storm WS."""
+        is_ok = True
+        try:
+            HTTPXClient.request("GET", self._url)
+        except:  # noqa
+            is_ok = False
+        return is_ok
