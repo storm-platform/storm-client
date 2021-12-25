@@ -5,6 +5,7 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
+import posixpath
 from cachetools import LRUCache, cached
 
 from typing import Dict
@@ -41,7 +42,13 @@ class CompendiumSearchService(BaseCompendiumService):
             In the ``user context`` only the compendia created by the user is
             available.
         """
-        operation_url = self._build_url("user" if user_records else [])
+        # special case: the user workspace is defined by a "user" path before the
+        # compendia url
+        operation_url = (
+            posixpath.join(self._service_url, self._base_path)
+            if user_records
+            else self.url
+        )
 
         # search compendia
         operation_result = self._create_request(
