@@ -29,7 +29,7 @@ class DictField:
         """Set the key value."""
         self.set_field(obj, value)
 
-    def __init__(self, key, default=None):
+    def __init__(self, key, default=None, create_if_missing=True):
         """Initializer
 
         Args:
@@ -42,8 +42,13 @@ class DictField:
         self._key = key
         self._default = default
 
+        self._create_if_missing = create_if_missing
+
     def get_key(self, obj):
         """Access data field."""
+        if not py_.has(obj.data, self._key) and self._create_if_missing:
+            self.set_field(obj, self._default)
+
         return py_.get(obj.data, self._key, self._default)
 
     def set_field(self, obj, value):
