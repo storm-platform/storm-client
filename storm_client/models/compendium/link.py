@@ -6,7 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 from ..base import BaseModel
-from ...field import LinkField
+from ...field import LinkField, DictField
 
 
 class BaseCompendiumLink(BaseModel):
@@ -30,7 +30,7 @@ class CompendiumRecordLink(BaseCompendiumLink):
     # Data fields
     #
 
-    self = LinkField("files", "CompendiumRecord")
+    self = LinkField("self", "CompendiumRecord")
     """Link to the Compendium (Record) itself."""
 
     latest = LinkField("latest", "CompendiumRecord")
@@ -50,8 +50,28 @@ class CompendiumDraftLink(BaseCompendiumLink):
     # Data fields
     #
 
-    self = LinkField("draft", "CompendiumDraft")
+    self = LinkField("self", "CompendiumDraft")
     """Link to the Compendium (Draft) itself."""
 
     def __init__(self, data=None):
         super(CompendiumDraftLink, self).__init__(data or {})
+
+
+class CompendiumFileLink(BaseModel):
+    """Compendium Files link class."""
+
+    def __init__(self, data=None):
+        super(CompendiumFileLink, self).__init__(data or {})
+
+    #
+    # Data fields
+    #
+
+    self = DictField("self")
+    """Link to the Compendium file itself."""
+
+    content = DictField("content")
+    """Link to the Compendium (Record) files content."""
+
+    commit = DictField("commit")
+    """Link to Commit a Compendium file."""

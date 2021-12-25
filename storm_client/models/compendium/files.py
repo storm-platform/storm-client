@@ -12,7 +12,7 @@ from storm_hasher import StormHasher
 
 from ..base import BaseModel
 from ...network import HTTPXClient
-from ...field import DictField, ObjectCollectionField
+from ...field import DictField, ObjectCollectionField, ObjectField
 
 
 class CompendiumFiles(BaseModel):
@@ -66,8 +66,8 @@ class CompendiumFileMetadata(BaseModel):
     """File bucket where is stored in the service."""
 
     # Links
-    url_content = DictField("links.content")
-    """URL to download the file content."""
+    links = ObjectField("links", "CompendiumFileLink")
+    """Compendium record links."""
 
     def __init__(self, data=None):
         super(CompendiumFileMetadata, self).__init__(data or {})
@@ -84,7 +84,7 @@ class CompendiumFileMetadata(BaseModel):
                                       checksum provided by the Storm WS.
         """
         output_directory = Path(output_directory)
-        file_content_link = self.url_content
+        file_content_link = self.links.content
 
         if file_content_link:
             output_file = output_directory / self.filename

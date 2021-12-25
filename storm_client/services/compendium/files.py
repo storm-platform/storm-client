@@ -51,12 +51,12 @@ class CompendiumFileService(BaseCompendiumService):
         files = py_.map(files, lambda x: {"key": os.path.join(x)})
 
         self._create_request("POST", operation_url, json=files, **request_options or {})
-        return compendium
+        return compendium.links.self
 
     def delete_defined_files(
         self, compendium: CompendiumDraft, files: List, request_options: Dict = None
     ):
-        """Delete an already defined Compendium Draft files in the Storm WS.
+        """Delete already defined Compendium Draft files in the Storm WS.
 
         Args:
             compendium (CompendiumDraft): Compendium Draft object.
@@ -64,6 +64,9 @@ class CompendiumFileService(BaseCompendiumService):
             files (list): A list with the filename to delete.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            CompendiumDraft: Updated compendium draft.
         """
         files_to_delete = compendium.links.files
 
@@ -71,12 +74,37 @@ class CompendiumFileService(BaseCompendiumService):
             if file.filename in files:
                 self._create_request("DELETE", file.url, **request_options or {})
 
+        return compendium.links.self
+
+    def commit_defined_files(
+        self, compendium: CompendiumDraft, files: List, request_options: Dict = None
+    ):
+        """Commit already defined Compendium Draft files in the Storm WS.
+
+        Args:
+            compendium (CompendiumDraft): Compendium Draft object.
+
+            files (list): A list with the filename to delete.
+
+            request_options (dict): Parameters to the ``httpx.Client.request`` method.
+
+        Returns:
+            CompendiumDraft: Updated compendium draft.
+        """
+        files_to_commit = compendium.links.files
+
+        for file in files_to_commit.entries:
+            if file.filename in files:
+                self._create_request("POST", file.links.commit, **request_options or {})
+
+        return compendium.links.self
+
     def upload_files(
         self,
         compendium: CompendiumDraft,
         files: Dict,
-        define_files: bool = True,
-        commit_files: bool = True,
+        define_files: bool = False,
+        commit_files: bool = False,
         request_options: Dict = None,
     ) -> CompendiumDraft:
         """Upload file content to the Storm WS.
@@ -107,14 +135,14 @@ class CompendiumFileService(BaseCompendiumService):
             file_to_upload = files.get(file.filename)
 
             # uploading
-            response = HTTPXClient.upload("PUT", file.url_content, file_to_upload)
+            response = HTTPXClient.upload("PUT", file.links.content, file_to_upload)
 
             if commit_files:
                 response_json = response.json()
 
                 commit_url = py_.get(response_json, "links.commit")
                 self._create_request("POST", commit_url, **request_options or {})
-        return compendium
+        return compendium.links.self  # reload from service
 
     async def _async_download_files(
         self,

@@ -6,7 +6,7 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 from .base import CompendiumBase
-from .link import CompendiumDraftLink, CompendiumRecordLink
+from .link import CompendiumDraftLink, CompendiumRecordLink, CompendiumFileLink
 from .model import CompendiumDraft, CompendiumRecord, CompendiumRecordList
 
 from .files import (
@@ -32,6 +32,7 @@ def init_model(factory):
         CompendiumRecordList,
         CompendiumFileMetadata,
         ExecutionDescriptor,
+        CompendiumFileLink,
     ]
 
     init_model_factory(factory, factory_classes)
