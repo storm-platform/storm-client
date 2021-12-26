@@ -1,0 +1,57 @@
+{
+    "title": "Example Project (V1)",
+    "description": "Description for the first version of the example project.",
+    "creators": [
+        {
+            "person_or_org": {
+                "family_name": "Felipe",
+                "type": "personal",
+                "name": "Felipe, Menino Carlos",
+                "given_name": "Menino Carlos"
+            }
+        }
+    ],
+    "rights": [
+        {
+            "title": "MIT License",
+            "link": "https://opensource.org/licenses/MIT",
+            "description": "MIT License"
+        }
+    ],
+    "contributors": [
+        {
+            "person_or_org": {
+                "family_name": "Felipe",
+                "type": "personal",
+                "name": "Felipe, Menino Carlos",
+                "given_name": "Menino Carlos"
+            }
+        }
+    ],
+    "subjects": [
+        "Example 1"
+    ],
+    "dates": [
+        {
+            "date": "2020/2021",
+            "type": {
+                "id": "available"
+            }
+        }
+    ],
+    "locations": {
+        "features": [
+            {
+                "description": "INPE ADC place.",
+                "geometry": {
+                    "coordinates": [
+                        -45.85,
+                        -23.2
+                    ],
+                    "type": "Point"
+                },
+                "place": "ADC INPE"
+            }
+        ]
+    }
+}
