@@ -92,23 +92,6 @@ class ProjectService(RecordOperatorService):
         """
         return self._create_op_save(project, "Project", request_options)
 
-    def delete(self, project: Union[str, Project], request_options: Dict = None):
-        """Delete an existing Research Project in the Storm WS.
-
-        Args:
-            project (Union[str, Project]): Project ID or Project object.
-
-            request_options (dict): Parameters to the ``httpx.Client.request`` method.
-
-        Returns:
-            None
-
-        See:
-            For more details about ``httpx.Client.request`` options, please check
-            the official documentation: https://www.python-httpx.org/api/#client
-        """
-        return self._create_op_delete(IDExtractor.extract(project), request_options)
-
     def finalize(self, project: Union[str, Project], request_options: Dict = None):
         """Finalize an existing Research Project in the Storm WS.
 
