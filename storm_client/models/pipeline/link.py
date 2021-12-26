@@ -30,4 +30,4 @@ class PipelineLink(BaseModel):
     """Link to the Pipeline itself in the service."""
 
     actions = ObjectField("actions", "PipelineActionLink")
-    """Link to the Pipeline itself in the service."""
+    """Link to the Pipeline Actions in the service."""

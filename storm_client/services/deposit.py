@@ -144,7 +144,7 @@ class DepositService(RecordOperatorService):
             IDExtractor.extract(deposit), "actions/start", "POST", request_options
         )
 
-        return self.get(deposit)
+        return deposit.links.self
 
     def cancel_deposit(
         self, deposit: Union[str, Deposit], request_options: Dict = None
@@ -167,4 +167,4 @@ class DepositService(RecordOperatorService):
             IDExtractor.extract(deposit), "actions/cancel", "POST", request_options
         )
 
-        return self.get(deposit)
+        return deposit.links.self

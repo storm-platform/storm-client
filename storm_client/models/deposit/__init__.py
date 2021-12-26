@@ -11,6 +11,9 @@ from .model import (
     DepositList,
     DepositServiceList,
 )
+
+from .link import DepositLink, DepositActionLink
+
 from ..factory import init_model_factory
 
 
@@ -23,5 +26,7 @@ def init_model(factory):
             DepositPluginService,
             DepositList,
             DepositServiceList,
+            DepositLink,
+            DepositActionLink,
         ],
     )

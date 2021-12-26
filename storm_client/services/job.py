@@ -140,7 +140,7 @@ class JobService(RecordOperatorService):
             IDExtractor.extract(job), "actions/start", "POST", request_options
         )
 
-        return self.get(job)
+        return job.links.self
 
     def cancel_job(self, job: Union[str, Job], request_options: Dict = None):
         """Cancel an Execution Job (In execution) in the Storm WS.
@@ -161,4 +161,4 @@ class JobService(RecordOperatorService):
             IDExtractor.extract(job), "actions/cancel", "POST", request_options
         )
 
-        return self.get(job)
+        return job.links.self

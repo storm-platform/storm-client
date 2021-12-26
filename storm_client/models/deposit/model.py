@@ -9,8 +9,8 @@ from pydash import py_
 from collections import UserList
 
 from ..base import BaseModel
-from ...field import DictField
 from ..extractor import IDExtractor
+from ...field import DictField, ObjectField
 
 
 class Deposit(BaseModel):
@@ -36,6 +36,13 @@ class Deposit(BaseModel):
 
     project = DictField("project_id")
     """Deposit associated project."""
+
+    customizations = DictField("customizations")
+    """Project metadata customizations available in the Deposit service."""
+
+    # Links
+    links = ObjectField("links", "DepositLink")
+    """Deposit links."""
 
     def __init__(self, data=None, **kwargs):
         super(Deposit, self).__init__(data or kwargs or {})

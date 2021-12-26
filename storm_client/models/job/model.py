@@ -10,7 +10,7 @@ from collections import UserList
 
 from ..base import BaseModel
 from ..extractor import IDExtractor
-from ...field import DictField
+from ...field import DictField, ObjectField
 
 
 class Job(BaseModel):
@@ -42,6 +42,9 @@ class Job(BaseModel):
 
     pipeline_id = DictField("pipeline_id")
     """Deposit defined pipelines."""
+
+    links = ObjectField("links", "JobLink")
+    """Job links."""
 
     def __init__(self, data=None, **kwargs):
         super(Job, self).__init__(data or kwargs or {})

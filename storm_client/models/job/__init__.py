@@ -6,6 +6,8 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 from .model import Job, JobPluginService, JobList, JobServiceList
+from .link import JobLink, JobActionLink
+
 from ..factory import init_model_factory
 
 
@@ -18,5 +20,7 @@ def init_model(factory):
             JobPluginService,
             JobList,
             JobServiceList,
+            JobLink,
+            JobActionLink,
         ],
     )
