@@ -241,7 +241,7 @@ print(pipeline_context.search())
 
 # To create a new Research Pipeline in the Storm WS service, first, we need
 # to create a Pipeline object and populate it with metadata:
-pipeline_id = f"my-example-pipeline"
+pipeline_id = "my-example-pipeline"
 
 pipeline = Pipeline(
     id=pipeline_id,
