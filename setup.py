@@ -54,7 +54,7 @@ install_requires = [
     "aiofiles>=0.7.0",
     "typeguard>=2.13.0",
     "simplejson>=3.17.6,<3.18",
-    "storm-hasher @ git+https://github.com/storm-platform/storm-hasher@master",
+    "storm-hasher @ git+https://github.com/storm-platform/storm-hasher",
 ]
 
 packages = find_packages()
