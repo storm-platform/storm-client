@@ -53,7 +53,7 @@ install_requires = [
     "httpx>=0.19.0",
     "aiofiles>=0.7.0",
     "typeguard>=2.13.0",
-    "simplejson>=3.17.6,<3.18"
+    "simplejson>=3.17.6,<3.18",
     "storm-hasher @ git+https://github.com/storm-platform/storm-hasher@master",
 ]
 
