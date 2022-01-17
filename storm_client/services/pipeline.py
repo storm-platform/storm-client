@@ -7,8 +7,8 @@
 
 from typing import Dict, Union
 
-from typeguard import typechecked
 from cachetools import LRUCache, cached
+from typeguard import typechecked
 
 from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
@@ -133,17 +133,21 @@ class PipelineService(RecordOperatorService):
         """
         diff_values = list(pipeline.diff())
 
-        added = (pipeline.links.actions.add_compendium, diff_values[0][1])
-        removed = (pipeline.links.actions.delete_compendium, diff_values[1][1])
+        added = ("POST", pipeline.links.actions.add_compendium, diff_values[0][1])
+        removed = (
+            "DELETE",
+            pipeline.links.actions.delete_compendium,
+            diff_values[1][1],
+        )
 
         # adding/removing compendia from the Storm WS
-        for operation_base_url, compendia_list in [removed, added]:
+        for method, operation_base_url, compendia_list in [removed, added]:
             for cid in compendia_list:
 
                 operation_url = f"{operation_base_url}/{cid}"
 
                 self._create_request(
-                    "POST", operation_url, json=pipeline, **request_options or {}
+                    method, operation_url, json=pipeline, **request_options or {}
                 )
 
         # reload the object from the server.
