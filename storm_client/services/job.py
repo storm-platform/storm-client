@@ -7,13 +7,13 @@
 
 from typing import Dict, Union
 
-from typeguard import typechecked
 from cachetools import LRUCache, cached
+from typeguard import typechecked
 
 from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
-from ..object_factory import ObjectFactory
 from ..models.job.model import JobList, Job
+from ..object_factory import ObjectFactory
 
 
 @typechecked
@@ -140,7 +140,7 @@ class JobService(RecordOperatorService):
             IDExtractor.extract(job), "actions/start", "POST", request_options
         )
 
-        return job.links.self
+        return self.get(job)
 
     def cancel_job(self, job: Union[str, Job], request_options: Dict = None):
         """Cancel an Execution Job (In execution) in the Storm WS.
@@ -161,4 +161,4 @@ class JobService(RecordOperatorService):
             IDExtractor.extract(job), "actions/cancel", "POST", request_options
         )
 
-        return job.links.self
+        return self.get(job)

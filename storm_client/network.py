@@ -5,12 +5,11 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-import httpx
 import aiofiles
+import httpx
 from pydash import py_
 
 from .store import TokenStore
-from .io import file_chunks_generator
 
 
 class HTTPXClient:
@@ -115,5 +114,5 @@ class HTTPXClient:
             the official documentation: https://www.python-httpx.org/api/#client
         """
         return HTTPXClient.request(
-            method=method, url=url, data=file_chunks_generator(file_path), **kwargs
+            method=method, url=url, data=open(file_path, "rb"), **kwargs
         )

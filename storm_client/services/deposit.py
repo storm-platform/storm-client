@@ -7,13 +7,13 @@
 
 from typing import Dict, Union
 
-from typeguard import typechecked
 from cachetools import LRUCache, cached
+from typeguard import typechecked
 
 from .base import RecordOperatorService
+from ..models.deposit import DepositList, Deposit
 from ..models.extractor import IDExtractor
 from ..object_factory import ObjectFactory
-from ..models.deposit import DepositList, Deposit
 
 
 @typechecked
@@ -144,7 +144,7 @@ class DepositService(RecordOperatorService):
             IDExtractor.extract(deposit), "actions/start", "POST", request_options
         )
 
-        return deposit.links.self
+        return self.get(deposit)
 
     def cancel_deposit(
         self, deposit: Union[str, Deposit], request_options: Dict = None
@@ -167,4 +167,4 @@ class DepositService(RecordOperatorService):
             IDExtractor.extract(deposit), "actions/cancel", "POST", request_options
         )
 
-        return deposit.links.self
+        return self.get(deposit)
