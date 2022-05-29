@@ -9,25 +9,25 @@ from ..base import BaseModel
 from ...field import LinkField, DictField, ObjectField
 
 
-class PipelineActionLink(BaseModel):
-    """Pipeline action link class."""
+class WorkflowActionLink(BaseModel):
+    """Workflow action link class."""
 
     add_compendium = DictField("add-compendium")
-    """Link to add a compendium in the pipeline."""
+    """Link to add a compendium in the workflow."""
 
     delete_compendium = DictField("delete-compendium")
-    """Link to delete a compendium in the pipeline."""
+    """Link to delete a compendium in the workflow."""
 
 
-class PipelineLink(BaseModel):
-    """Pipeline link class."""
+class WorkflowLink(BaseModel):
+    """Workflow link class."""
 
     #
     # Data fields
     #
 
-    self = LinkField("self", "Pipeline")
+    self = LinkField("self", "Workflow")
     """Link to the Pipeline itself in the service."""
 
-    actions = ObjectField("actions", "PipelineActionLink")
+    actions = ObjectField("actions", "WorkflowActionLink")
     """Link to the Pipeline Actions in the service."""

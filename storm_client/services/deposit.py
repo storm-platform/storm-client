@@ -11,21 +11,21 @@ from cachetools import LRUCache, cached
 from typeguard import typechecked
 
 from .base import RecordOperatorService
-from ..models.deposit import DepositList, Deposit
+from ..models.deposit import DepositJobList, DepositJob
 from ..models.extractor import IDExtractor
 from ..object_factory import ObjectFactory
 
 
 @typechecked
-class DepositService(RecordOperatorService):
+class DepositJobService(RecordOperatorService):
     """Deposit service."""
 
     base_path = "deposits"
     """Base service path in the Rest API."""
 
     @cached(cache=LRUCache(maxsize=128))
-    def search(self, request_options: Dict = None, **kwargs) -> DepositList:
-        """Search for deposits in the Storm WS.
+    def search(self, request_options: Dict = None, **kwargs) -> DepositJobList:
+        """Search for deposit jobs in the Storm WS.
 
         Args:
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
@@ -35,13 +35,13 @@ class DepositService(RecordOperatorService):
         Returns:
             DepositList: List with the founded Deposits.
         """
-        return self._create_op_search("DepositList", request_options, **kwargs)
+        return self._create_op_search("DepositJobList", request_options, **kwargs)
 
-    def create(self, deposit: Deposit, request_options: Dict = None) -> Deposit:
+    def create(self, deposit: DepositJob, request_options: Dict = None) -> DepositJob:
         """Create a new Deposit request in the Storm WS.
 
         Args:
-            deposit (Deposit): Deposit object to be created in the Storm WS.
+            deposit (DepositJob): Deposit Job object to be created in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -52,15 +52,15 @@ class DepositService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_create(deposit, "Deposit", request_options)
+        return self._create_op_create(deposit, "DepositJob", request_options)
 
     def get(
-        self, deposit: Union[str, Deposit], request_options: Dict = None
-    ) -> Deposit:
-        """Get an existing Deposit request from Storm WS.
+        self, deposit: Union[str, DepositJob], request_options: Dict = None
+    ) -> DepositJob:
+        """Get an existing Deposit Job request from Storm WS.
 
         Args:
-            deposit (str):  Deposit ID or Deposit object.
+            deposit (str):  Deposit Job ID or Deposit Job object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -72,14 +72,14 @@ class DepositService(RecordOperatorService):
             the official documentation: https://www.python-httpx.org/api/#client
         """
         return self._create_op_get(
-            IDExtractor.extract(deposit), "Deposit", request_options
+            IDExtractor.extract(deposit), "DepositJob", request_options
         )
 
-    def save(self, deposit: Deposit, request_options: Dict = None) -> Deposit:
+    def save(self, deposit: DepositJob, request_options: Dict = None) -> DepositJob:
         """Update an existing Deposit request in the Storm WS.
 
         Args:
-            deposit (Deposit): Deposit object to be saved in the Storm WS.
+            deposit (DepositJob): Deposit Job object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -90,13 +90,13 @@ class DepositService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_save(deposit, "Deposit", request_options)
+        return self._create_op_save(deposit, "DepositJob", request_options)
 
-    def delete(self, deposit: Union[str, Deposit], request_options: Dict = None):
-        """Delete an existing Deposit request from the Storm WS.
+    def delete(self, deposit: Union[str, DepositJob], request_options: Dict = None):
+        """Delete an existing Deposit Job request from the Storm WS.
 
         Args:
-            deposit (Union[str, Deposit]): Deposit ID or Deposit object.
+            deposit (Union[str, Deposit]): Deposit Job ID or Deposit Job object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -123,9 +123,9 @@ class DepositService(RecordOperatorService):
             "GET", operation_url, **request_options or {}
         )
 
-        return ObjectFactory.resolve("DepositServiceList", operation_result.json())
+        return ObjectFactory.resolve("DepositJobServiceList", operation_result.json())
 
-    def start_deposit(self, deposit: Union[str, Deposit], request_options: Dict = None):
+    def start_deposit(self, deposit: Union[str, DepositJob], request_options: Dict = None):
         """Start an existing Deposit in the Storm WS.
 
         Args:
@@ -147,12 +147,12 @@ class DepositService(RecordOperatorService):
         return self.get(deposit)
 
     def cancel_deposit(
-        self, deposit: Union[str, Deposit], request_options: Dict = None
+        self, deposit: Union[str, DepositJob], request_options: Dict = None
     ):
-        """Cancel an existing Deposit (In progress) in the Storm WS.
+        """Cancel an existing Deposit Job (In progress) in the Storm WS.
 
         Args:
-            deposit (Union[str, Deposit]): Deposit ID or Deposit object.
+            deposit (Union[str, DepositJob]): Deposit Job ID or Deposit Job object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 

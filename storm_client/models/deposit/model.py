@@ -13,11 +13,11 @@ from ..extractor import IDExtractor
 from ...field import DictField, ObjectField
 
 
-class Deposit(BaseModel):
-    """Deposit model.
+class DepositJob(BaseModel):
+    """DepositJob model.
 
-    Deposit is a Storm WS job to send a project content
-    (Metadata and pipeline data) to a external service
+    DepositJob is a Storm WS job to send a project content
+    (Metadata and workflow data) to a external service
     like GEO Knowledge Hub and Zenodo.
     """
 
@@ -28,8 +28,8 @@ class Deposit(BaseModel):
     status = DictField("status")
     """Deposit status."""
 
-    pipelines = DictField("pipelines")
-    """Deposit defined pipelines."""
+    workflows = DictField("workflows")
+    """Deposit defined workflows."""
 
     service = DictField("service")
     """Deposit service."""
@@ -41,11 +41,11 @@ class Deposit(BaseModel):
     """Project metadata customizations available in the Deposit service."""
 
     # Links
-    links = ObjectField("links", "DepositLink")
+    links = ObjectField("links", "DepositJobLink")
     """Deposit links."""
 
     def __init__(self, data=None, **kwargs):
-        super(Deposit, self).__init__(data or kwargs or {})
+        super(DepositJob, self).__init__(data or kwargs or {})
 
     def for_json(self):  # ``simplejson`` encoder method
         """Encode the object into a dict-like serializable object."""
@@ -53,13 +53,13 @@ class Deposit(BaseModel):
             py_.clone_deep(self.data),
             {
                 "service": IDExtractor.extract(self.service),
-                "pipelines": [IDExtractor.extract(i) for i in self.pipelines],
+                "workflows": [IDExtractor.extract(i) for i in self.workflows],
             },
         )
 
 
-class DepositPluginService(BaseModel):
-    """Deposit Plugin Service model.
+class DepositJobPluginService(BaseModel):
+    """DepositJob Plugin Service model.
 
     In the Deposit context on Storm WS, the deposit
     job can deposit data in many kinds of services.
@@ -88,27 +88,27 @@ class DepositPluginService(BaseModel):
     """Deposit Plugin service description (From metadata)."""
 
     def __init__(self, data=None, **kwargs):
-        super(DepositPluginService, self).__init__(data or kwargs or {})
+        super(DepositJobPluginService, self).__init__(data or kwargs or {})
 
 
-class DepositList(UserList):
-    """A collection of Deposits requests."""
+class DepositJobList(UserList):
+    """A collection of DepositsJob requests."""
 
     def __init__(self, data=None):
         if py_.has(data, "hits.hits"):
             data = py_.get(data, "hits.hits")
 
-        data = py_.map(data, lambda obj: Deposit(obj))
-        super(DepositList, self).__init__(data)
+        data = py_.map(data, lambda obj: DepositJob(obj))
+        super(DepositJobList, self).__init__(data)
 
 
-class DepositServiceList(UserList):
+class DepositJobServiceList(UserList):
     """A collection of Deposits Services."""
 
     def __init__(self, data=None):
         if py_.has(data, "hits.hits"):
             data = py_.get(data, "hits.hits")
 
-        super(DepositServiceList, self).__init__(
-            py_.map(data, lambda obj: DepositPluginService(obj))
+        super(DepositJobServiceList, self).__init__(
+            py_.map(data, lambda obj: DepositJobPluginService(obj))
         )

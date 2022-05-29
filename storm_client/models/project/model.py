@@ -27,7 +27,7 @@ class Project(BaseModel):
 
     # General informations
     is_finished = DictField("is_finished")
-    """Flag indicating if the pipeline is finished."""
+    """Flag indicating if the workflow is finished."""
 
     revision_id = DictField("revision_id")
     """Revision ID."""

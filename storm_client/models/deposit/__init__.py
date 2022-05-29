@@ -6,13 +6,13 @@
 # under the terms of the MIT License; see LICENSE file for more details.
 
 from .model import (
-    Deposit,
-    DepositPluginService,
-    DepositList,
-    DepositServiceList,
+    DepositJob,
+    DepositJobPluginService,
+    DepositJobList,
+    DepositJobServiceList,
 )
 
-from .link import DepositLink, DepositActionLink
+from .link import DepositJobLink, DepositJobActionLink
 
 from ..factory import init_model_factory
 
@@ -22,11 +22,11 @@ def init_model(factory):
     init_model_factory(
         factory,
         [
-            Deposit,
-            DepositPluginService,
-            DepositList,
-            DepositServiceList,
-            DepositLink,
-            DepositActionLink,
+            DepositJob,
+            DepositJobPluginService,
+            DepositJobList,
+            DepositJobServiceList,
+            DepositJobLink,
+            DepositJobActionLink,
         ],
     )

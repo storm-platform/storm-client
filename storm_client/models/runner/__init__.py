@@ -5,8 +5,8 @@
 # storm-client is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from .model import Job, JobPluginService, JobList, JobServiceList
-from .link import JobLink, JobActionLink
+from .model import ExecutionJob, ExecutionJobPluginService, ExecutionJobList, ExecutionJobServiceList
+from .link import ExecutionJobLink, ExecutionJobActionLink
 
 from ..factory import init_model_factory
 
@@ -16,11 +16,11 @@ def init_model(factory):
     init_model_factory(
         factory,
         [
-            Job,
-            JobPluginService,
-            JobList,
-            JobServiceList,
-            JobLink,
-            JobActionLink,
+            ExecutionJob,
+            ExecutionJobPluginService,
+            ExecutionJobList,
+            ExecutionJobServiceList,
+            ExecutionJobLink,
+            ExecutionJobActionLink,
         ],
     )

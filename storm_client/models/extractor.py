@@ -20,13 +20,13 @@ class IDExtractor:
         # string, is assumed that the content
         # is a valid Storm WS id.
         "str": lambda x: x,
-        "Job": lambda x: x.id,
-        "Deposit": lambda x: x.id,
+        "ExecutionJob": lambda x: x.id,
+        "DepositJob": lambda x: x.id,
         "Project": lambda x: x.id,
-        "Pipeline": lambda x: x.id,
-        "JobPluginService": lambda x: x.id,
+        "Workflow": lambda x: x.id,
+        "ExecutionJobPluginService": lambda x: x.id,
         "CompendiumRecord": lambda x: x.id,
-        "DepositPluginService": lambda x: x.id,
+        "DepositJobPluginService": lambda x: x.id,
     }
 
     @classmethod

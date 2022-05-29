@@ -15,12 +15,12 @@ from ..base import VersionedModel
 from ..extractor import IDExtractor
 
 
-class Pipeline(VersionedModel):
-    """Pipeline model.
+class Workflow(VersionedModel):
+    """Workflow model.
 
-    A pipeline is an ordered sequence of steps representing the processing
+    A workflow is an ordered sequence of steps representing the processing
     flow applied in research to produce the results. In the Storm WS, the
-    pipeline is modeled as a  Directed Acyclic Graph (DAG), where each step
+    workflow is modeled as a  Directed Acyclic Graph (DAG), where each step
     is a Record Compendium (Published in the project).
     """
 
@@ -30,27 +30,27 @@ class Pipeline(VersionedModel):
 
     # General informations.
     is_finished = DictField("is_finished")
-    """Flag indicating if the pipeline is finished."""
+    """Flag indicating if the workflow is finished."""
 
     # Metadata.
     metadata = DictField("metadata")
-    """Complete pipeline metadata."""
+    """Complete workflow metadata."""
 
     title = DictField("metadata.title")
-    """Pipeline title (From metadata)."""
+    """Workflow title (From metadata)."""
 
     description = DictField("metadata.description")
-    """Pipeline description (From metadata)."""
+    """Workflow description (From metadata)."""
 
     version = DictField("metadata.version")
-    """Pipeline version (From metadata)."""
+    """Workflow version (From metadata)."""
 
     # Compendium graph data.
     graph = DictField("metadata.graph")
-    """Pipeline graph."""
+    """Workflow graph."""
 
     # Links
-    links = ObjectField("links", "PipelineLink")
+    links = ObjectField("links", "WorkflowLink")
     """Compendium draft links."""
 
     @property
@@ -63,7 +63,7 @@ class Pipeline(VersionedModel):
         self._current_state = compendia
 
     def __init__(self, data=None, **kwargs):
-        super(Pipeline, self).__init__(data or kwargs or {})
+        super(Workflow, self).__init__(data or kwargs or {})
 
         # saving the original state of the
         # compendia available in the graph.
@@ -86,7 +86,7 @@ class Pipeline(VersionedModel):
         )
         if compendia_types:
             raise TypeError(
-                "Invalid Compendia! You can only define a pipeline compendia using ``str`` and ``CompendiumRecord``"
+                "Invalid Compendia! You can only define a workflow compendia using ``str`` and ``CompendiumRecord``"
             )
 
         # handle the available objects.
@@ -125,11 +125,11 @@ class Pipeline(VersionedModel):
         return ("added", added), ("removed", removed)
 
 
-class PipelineList(UserList):
-    """A collection of Research pipelines."""
+class WorkflowList(UserList):
+    """A collection of Research Workflow."""
 
     def __init__(self, data=None):
         if py_.has(data, "hits.hits"):
             data = py_.get(data, "hits.hits")
 
-        super(PipelineList, self).__init__(py_.map(data, lambda obj: Pipeline(obj)))
+        super(WorkflowList, self).__init__(py_.map(data, lambda obj: Workflow(obj)))

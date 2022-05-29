@@ -12,19 +12,19 @@ from typeguard import typechecked
 
 from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
-from ..models.job.model import JobList, Job
+from ..models.runner.model import ExecutionJobList, ExecutionJob
 from ..object_factory import ObjectFactory
 
 
 @typechecked
-class JobService(RecordOperatorService):
+class RunnerService(RecordOperatorService):
     """Deposit service."""
 
-    base_path = "jobs"
+    base_path = "runs"
     """Base service path in the Rest API."""
 
     @cached(cache=LRUCache(maxsize=128))
-    def search(self, request_options: Dict = None, **kwargs) -> JobList:
+    def search(self, request_options: Dict = None, **kwargs) -> ExecutionJobList:
         """Search for jobs in the Storm WS.
 
         Args:
@@ -35,13 +35,13 @@ class JobService(RecordOperatorService):
         Returns:
             JobList: List with the founded Jobs.
         """
-        return self._create_op_search("JobList", request_options, **kwargs)
+        return self._create_op_search("ExecutionJobList", request_options, **kwargs)
 
-    def create(self, job: Job, request_options: Dict = None) -> Job:
+    def create(self, job: ExecutionJob, request_options: Dict = None) -> ExecutionJob:
         """Create a new Execution Job in the Storm WS.
 
         Args:
-            job (Deposit): Job object to be created in the Storm WS.
+            job (ExecutionJob): Job object to be created in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -52,13 +52,13 @@ class JobService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_create(job, "Job", request_options)
+        return self._create_op_create(job, "ExecutionJob", request_options)
 
-    def get(self, job: Union[str, Job], request_options: Dict = None) -> Job:
+    def get(self, job: Union[str, ExecutionJob], request_options: Dict = None) -> ExecutionJob:
         """Get an existing Execution Job from Storm WS.
 
         Args:
-            job (Union[str, Job]): Job ID or Job record.
+            job (Union[str, ExecutionJob]): Job ID or Job record.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -69,13 +69,13 @@ class JobService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_get(IDExtractor.extract(job), "Job", request_options)
+        return self._create_op_get(IDExtractor.extract(job), "ExecutionJob", request_options)
 
-    def save(self, job: Job, request_options: Dict = None) -> Job:
+    def save(self, job: ExecutionJob, request_options: Dict = None) -> ExecutionJob:
         """Update an existing Execution Job in the Storm WS.
 
         Args:
-            job (Job): Job object to be saved in the Storm WS.
+            job (ExecutionJob): Job object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -86,13 +86,13 @@ class JobService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_save(job, "Job", request_options)
+        return self._create_op_save(job, "ExecutionJob", request_options)
 
-    def delete(self, job: Union[str, Job], request_options: Dict = None):
+    def delete(self, job: Union[str, ExecutionJob], request_options: Dict = None):
         """Delete an existing Execution Job from the Storm WS.
 
         Args:
-            job (Union[str, Job]): Job ID or Job record.
+            job (Union[str, ExecutionJob]): Job ID or Job record.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -119,13 +119,13 @@ class JobService(RecordOperatorService):
             "GET", operation_url, **request_options or {}
         )
 
-        return ObjectFactory.resolve("JobServiceList", operation_result.json())
+        return ObjectFactory.resolve("ExecutionJobServiceList", operation_result.json())
 
-    def start_job(self, job: Union[str, Job], request_options: Dict = None):
+    def start_job(self, job: Union[str, ExecutionJob], request_options: Dict = None):
         """Start an existing Execution Job in the Storm WS.
 
         Args:
-            job (Union[str, Job]): Job ID or Job object.
+            job (Union[str, ExecutionJob]): Job ID or Job object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -142,11 +142,11 @@ class JobService(RecordOperatorService):
 
         return self.get(job)
 
-    def cancel_job(self, job: Union[str, Job], request_options: Dict = None):
+    def cancel_job(self, job: Union[str, ExecutionJob], request_options: Dict = None):
         """Cancel an Execution Job (In execution) in the Storm WS.
 
         Args:
-            job (Union[str, Job]): Job ID or Job object.
+            job (Union[str, ExecutionJob]): Job ID or Job object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 

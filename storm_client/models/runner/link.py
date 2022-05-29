@@ -9,7 +9,7 @@ from ..base import BaseModel
 from ...field import LinkField, DictField, ObjectField
 
 
-class JobActionLink(BaseModel):
+class ExecutionJobActionLink(BaseModel):
     """Job action link class."""
 
     start = DictField("start")
@@ -19,15 +19,15 @@ class JobActionLink(BaseModel):
     """Link to cancel a Job process."""
 
 
-class JobLink(BaseModel):
+class ExecutionJobLink(BaseModel):
     """Job link class."""
 
     #
     # Data fields
     #
 
-    self = LinkField("self", "Job")
+    self = LinkField("self", "ExecutionJob")
     """Link to the Deposit itself in the service."""
 
-    actions = ObjectField("actions", "JobActionLink")
-    """Link to the Job Actions itself in the service."""
+    actions = ObjectField("actions", "ExecutionJobActionLink")
+    """Link to the Execution Job Actions itself in the service."""

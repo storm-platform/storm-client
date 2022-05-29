@@ -12,19 +12,19 @@ from typeguard import typechecked
 
 from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
-from ..models.pipeline.model import Pipeline, PipelineList
+from ..models.workflow.model import Workflow, WorkflowList
 
 
 @typechecked
-class PipelineService(RecordOperatorService):
-    """Research Pipeline service."""
+class WorkflowService(RecordOperatorService):
+    """Research Workflow service."""
 
-    base_path = "pipelines"
+    base_path = "workflows"
     """Base service path in the Rest API."""
 
     @cached(cache=LRUCache(maxsize=128))
-    def search(self, request_options: Dict = None, **kwargs) -> PipelineList:
-        """Search for Research pipelines.
+    def search(self, request_options: Dict = None, **kwargs) -> WorkflowList:
+        """Search for Research Workflows.
 
         Args:
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
@@ -32,70 +32,70 @@ class PipelineService(RecordOperatorService):
             **kwargs (dict): Search parameters.
 
         Returns:
-            PipelineList: List with the founded Research Pipelines.
+            WorkflowList: List with the founded Research Workflows.
         """
-        return self._create_op_search("PipelineList", request_options, **kwargs)
+        return self._create_op_search("WorkflowList", request_options, **kwargs)
 
-    def create(self, pipeline: Pipeline, request_options: Dict = None) -> Pipeline:
-        """Create a new Research Pipeline in the Storm WS.
+    def create(self, workflow: Workflow, request_options: Dict = None) -> Workflow:
+        """Create a new Research Workflow in the Storm WS.
 
         Args:
-            pipeline (Pipeline): Pipeline object to be created in the Storm WS.
+            workflow (Workflow): Workflow object to be created in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Pipeline: Created Research Pipeline.
+            Workflow: Created Research Workflow.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_create(pipeline, "Pipeline", request_options)
+        return self._create_op_create(workflow, "Workflow", request_options)
 
     def get(
-        self, pipeline: Union[str, Pipeline], request_options: Dict = None
-    ) -> Pipeline:
-        """Get an existing Research Pipeline from Storm WS.
+        self, workflow: Union[str, Workflow], request_options: Dict = None
+    ) -> Workflow:
+        """Get an existing Research Workflow from Storm WS.
 
         Args:
-            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
+            workflow (Union[str, Workflow]): Workflow ID or Workflow object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Pipeline: Research Pipeline.
+            Workflow: Research Workflow.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
         return self._create_op_get(
-            IDExtractor.extract(pipeline), "Pipeline", request_options
+            IDExtractor.extract(workflow), "Workflow", request_options
         )
 
-    def save(self, pipeline: Pipeline, request_options: Dict = None) -> Pipeline:
-        """Update an existing Research Pipeline in the Storm WS.
+    def save(self, workflow: Workflow, request_options: Dict = None) -> Workflow:
+        """Update an existing Research Workflow in the Storm WS.
 
         Args:
-            pipeline (Pipeline): Pipeline object to be saved in the Storm WS.
+            workflow (Workflow): Workflow object to be saved in the Storm WS.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Pipeline: Updated Research Pipeline.
+            Workflow: Updated Research Workflow.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        return self._create_op_save(pipeline, "Pipeline", request_options)
+        return self._create_op_save(workflow, "Workflow", request_options)
 
-    def delete(self, pipeline: Union[str, Pipeline], request_options: Dict = None):
-        """Delete an existing Research Pipeline from Storm WS.
+    def delete(self, workflow: Union[str, Workflow], request_options: Dict = None):
+        """Delete an existing Research Workflow from Storm WS.
 
         Args:
-            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
+            workflow (Union[str, Workflow]): Workflow ID or Workflow object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -106,21 +106,21 @@ class PipelineService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        self._create_op_delete(IDExtractor.extract(pipeline), request_options)
+        self._create_op_delete(IDExtractor.extract(Workflow), request_options)
 
     def sync_compendia(
         self,
-        pipeline: Pipeline,
+        workflow: Workflow,
         request_options: Dict = None,
     ):
-        """Synchronize a local Research Pipeline Graph with the Storm WS.
+        """Synchronize a local Research Workflow Graph with the Storm WS.
 
-        This method calculates the difference between the ``pipeline graph`` defined by the user
+        This method calculates the difference between the ``workflow graph`` defined by the user
         with it original version (Loaded from the server). The differences (additions and removals)
         are synchronized.
         Args:
 
-            pipeline (Pipeline): Pipeline object.
+            workflow (Workflow): Workflow object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
@@ -131,12 +131,12 @@ class PipelineService(RecordOperatorService):
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
-        diff_values = list(pipeline.diff())
+        diff_values = list(workflow.diff())
 
-        added = ("POST", pipeline.links.actions.add_compendium, diff_values[0][1])
+        added = ("POST", workflow.links.actions.add_compendium, diff_values[0][1])
         removed = (
             "DELETE",
-            pipeline.links.actions.delete_compendium,
+            workflow.links.actions.delete_compendium,
             diff_values[1][1],
         )
 
@@ -147,29 +147,29 @@ class PipelineService(RecordOperatorService):
                 operation_url = f"{operation_base_url}/{cid}"
 
                 self._create_request(
-                    method, operation_url, json=pipeline, **request_options or {}
+                    method, operation_url, json=workflow, **request_options or {}
                 )
 
         # reload the object from the server.
-        return pipeline.links.self
+        return workflow.links.self
 
-    def finalize(self, pipeline: Union[str, Pipeline], request_options: Dict = None):
-        """Finalize an existing Research Pipeline in the Storm WS.
+    def finalize(self, workflow: Union[str, Workflow], request_options: Dict = None):
+        """Finalize an existing Research Workflow in the Storm WS.
 
         Args:
-            pipeline (Union[str, Pipeline]): Pipeline ID or Pipeline object.
+            workflow (Union[str, Workflow]): Workflow ID or Workflow object.
 
             request_options (dict): Parameters to the ``httpx.Client.request`` method.
 
         Returns:
-            Pipeline: Updated Research Pipeline.
+            Workflow: Updated Research Workflow.
 
         See:
             For more details about ``httpx.Client.request`` options, please check
             the official documentation: https://www.python-httpx.org/api/#client
         """
         self._create_op_action(
-            IDExtractor.extract(pipeline), "actions/finish", "POST", request_options
+            IDExtractor.extract(workflow), "actions/finish", "POST", request_options
         )
 
-        return self.get(pipeline)
+        return self.get(workflow)
