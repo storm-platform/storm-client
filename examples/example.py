@@ -8,17 +8,17 @@
 import json
 
 from storm_client import Storm
-from storm_client.models.deposit import Deposit
-from storm_client.models.job import Job
+from storm_client.models.deposit import DepositJob
+from storm_client.models.runner import ExecutionJob
 from storm_client.models.project import Project
-from storm_client.models.pipeline import Pipeline
+from storm_client.models.workflow import Workflow
 from storm_client.models.compendium import CompendiumDraft
 
 #
 # 1. Defining a Storm Client instance.
 #
 service = Storm(
-    url="https://127.0.0.1/ws/api",
+    url="<service-address>",
     access_token="<access-token>",
     # ... other http options (e.g., timeout)
 )
@@ -31,7 +31,7 @@ print(service.is_connected)
 #
 
 # Project identifier
-project_identifier = f"my-example-project"
+project_identifier = "my-example-project"
 
 # Loading the project metadata from a JSON document.
 project_metadata = json.load(open("data/project_metadata.json"))
@@ -94,7 +94,7 @@ project_context = service.project(project_identifier)
 
 # With the Context, we can access all related resource, such as:
 #   > Compendia  (project_context.compendia)
-#   > Pipelines  (project_context.pipeline)
+#   > Workflows  (project_context.workflow)
 #   > Deposits   (project_context.deposit)
 #   > Jobs       (project_context.job)
 
@@ -228,26 +228,26 @@ compendium_record = compendium_context.draft.publish(compendium_draft)
 print(compendium_context.search(user_records=True, q=f"id:{compendium_record.id}"))
 
 #
-# 6.2. Accessing the Research Pipeline Context.
+# 6.2. Accessing the Research Workflow Context.
 #
 
-# To work with the pipelines, we use the Research Pipeline Context:
-pipeline_context = project_context.pipeline
+# To work with the workflows, we use the Research Workflow Context:
+workflow_context = project_context.workflow
 
-# In this context, we can search for available pipelines:
-print(pipeline_context.search())
+# In this context, we can search for available workflows:
+print(workflow_context.search())
 
-# 6.2.1. Creating a Research Pipeline.
+# 6.2.1. Creating a Research Workflow.
 
-# To create a new Research Pipeline in the Storm WS service, first, we need
-# to create a Pipeline object and populate it with metadata:
-pipeline_id = "my-example-pipeline"
+# To create a new Research Workflow in the Storm WS service, first, we need
+# to create a Workflow object and populate it with metadata:
+workflow_id = "my-example-workflow"
 
-pipeline = Pipeline(
-    id=pipeline_id,
+workflow = Workflow(
+    id=workflow_id,
     metadata={
-        "title": "Pipeline example",
-        "description": "A very simple pipeline",
+        "title": "Workflow example",
+        "description": "A very simple workflow",
         "version": "1.0",
     },
 )
@@ -255,110 +255,107 @@ pipeline = Pipeline(
 # Checking the object properties
 
 #  > ID
-print(pipeline.id)
+print(workflow.id)
 
 #  > Description
-print(pipeline.description)
+print(workflow.description)
 
 #  > Complete JSON document.
-print(pipeline.data)
+print(workflow.data)
 
 # With the local object created, let us save it in the Storm WS:
-example_pipeline = pipeline_context.create(pipeline)
+example_workflow = workflow_context.create(workflow)
 
-# We can check the created Research Pipeline:
-print(example_pipeline)
+# We can check the created Research Workflow:
+print(example_workflow)
 
-# To confirm the Research Pipeline creation in the Storm WS,
+# To confirm the Research Workflow creation in the Storm WS,
 # let us read it from the server:
-example_pipeline = pipeline_context.get(example_pipeline.id)
+example_workflow = workflow_context.get(example_workflow.id)
 
-# 6.2.2. Editing a Research Pipeline.
+# 6.2.2. Editing a Research Workflow.
 
 # After saving the Research Compendium in the Storm WS,
 # we can edit its metadata. For example, let us update
-# the pipeline title created above.
-example_pipeline.title = "Pipeline example (Updated)"
+# the workflow title created above.
+example_workflow.title = "Workflow example (Updated)"
 
 # Now, send the modification to the Storm WS:
-example_pipeline = pipeline_context.save(example_pipeline)
-print(example_pipeline)
+example_workflow = workflow_context.save(example_workflow)
+print(example_workflow)
 
-# 6.2.3. Adding compendia to the Research Pipeline.
+# 6.2.3. Adding compendia to the Research Workflow.
 
-# To compose an executable pipeline, we need to add compendia
+# To compose an executable workflow, we need to add compendia
 # to it. So, let us add the Compendium Record created above
-# to our pipeline:
-example_pipeline.compendia.append(compendium_record)
+# to our workflow:
+example_workflow.compendia.append(compendium_record)
 
-# (Other ways to add a Compendium Record in the Research Pipeline)
+# (Other ways to add a Compendium Record in the Research Workflow)
 # or
-# example_pipeline.compendia.append("<compendium-record-id>")
-
-# or
-# example_pipeline.compendia.extent(["<compendium-record-id>"])
+# example_workflow.compendia.append("<compendium-record-id>")
 
 # or
-# example_pipeline.compendia.extent(["<compendium-record-id>", compendium-object])
+# example_workflow.compendia.extent(["<compendium-record-id>"])
 
-# After we add the Compendium Record to the Research Pipeline,
-# we can synchronize the Research Pipeline and save these changes in the Storm WS:
-example_pipeline = pipeline_context.sync_compendia(example_pipeline)
-print(example_pipeline)
+# or
+# example_workflow.compendia.extent(["<compendium-record-id>", compendium-object])
+
+# After we add the Compendium Record to the Research Workflow,
+# we can synchronize the Research Workflow and save these changes in the Storm WS:
+example_workflow = workflow_context.sync_compendia(example_workflow)
+print(example_workflow)
 
 # Note that we must synchronize any modification done
-# into the Research Pipeline (Compendium Additions and exclusions).
+# into the Research Workflow (Compendium Additions and exclusions).
 
-# 6.2.4. Finish the Research Pipeline.
+# 6.2.4. Finish the Research Workflow.
 
-# After completing the Research Pipeline and adding all required
-# Compendium Records, we can finalize the Research Pipeline.
-# Any user cannot change a finalized Research Pipeline. It will
+# After completing the Research Workflow and adding all required
+# Compendium Records, we can finalize the Research Workflow.
+# Any user cannot change a finalized Research Workflow. It will
 # be frozen in the service.
 
-# > Checking if the current pipeline is finished:
-print(example_pipeline.is_finished)
+# > Checking if the current workflow is finished:
+print(example_workflow.is_finished)
 
 # > Let us finish it
-example_pipeline = pipeline_context.finalize(example_pipeline)
+example_workflow = workflow_context.finalize(example_workflow)
 
-# > Checking if the pipeline was finished:
-print(example_pipeline.is_finished)
+# > Checking if the workflow was finished:
+print(example_workflow.is_finished)
 
-# 6.2.5. Delete a Research Pipeline (Optional).
+# 6.2.5. Delete a Research Workflow (Optional).
 
-# We can also delete the Research pipeline:
-# pipeline_context.delete(example_pipeline)
+# We can also delete the Research workflow:
+# workflow_context.delete(example_workflow)
 
-# (Other way to delete a Research Pipeline)
-# pipeline_context("<pipeline-id>")
-
-# Note: A Research pipeline finished cannot be deleted.
+# Note: A Research workflow finished cannot be deleted.
 
 #
-# 6.3. Accessing the Deposit Context.
+# 6.3. Accessing the Deposit Job Context.
 #
 
-# To work with the deposits, we use the Deposit Context:
+# To work with the deposits jobs, we use the Deposit Job Context:
 deposit_context = project_context.deposit
 
-# In this context, we can search for available deposits:
+# In this context, we can search for available deposit jobs:
 print(deposit_context.search())
 
-# 6.3.1. Searching deposit services.
+# 6.3.1. Searching deposit job services.
 
-# In the Storm WS, it is available multiple deposits services. Each
+# In the Storm WS, it is available multiple deposit jobs services. Each
 # service is specialized to send the data to a different place (e.g., GEO Knowledge Hub, Zenodo).
 # To get the list of available services, we can use the following context
 # function:
 print(deposit_context.list_services())
 
-# 6.3.2. Creating a Deposit.
+# 6.3.2. Creating a Deposit Job.
 
-# To create a new Deposit in the Storm WS service, first, we need
-# to create a Deposit object and populate it with metadata:
-deposit = Deposit(
-    pipelines=[example_pipeline],  # here, we can also declare pipelines using their ID.
+# To create a new Deposit Job in the Storm WS service, first, we need
+# to create a DepositJob object and populate it with metadata:
+deposit = DepositJob(
+    workflows=[example_workflow],  # here, we can also declare workflows using their ID.
     service="deposit-gkhub",  # name retrieved from the `list_services` method result.
 )
 
@@ -367,8 +364,8 @@ deposit = Deposit(
 #  > ID
 print(deposit.id)  # filled after saving the deposit in the service.
 
-#  > Associated pipelines
-print(deposit.pipelines)
+#  > Associated workflows
+print(deposit.workflows)
 
 #  > Associated service
 print(deposit.service)
@@ -385,20 +382,20 @@ example_deposit = deposit_context.create(deposit)
 # We can check the created Deposit:
 print(example_deposit)
 
-# To confirm the Deposit creation in the Storm WS,
+# To confirm the Deposit Job creation in the Storm WS,
 # let us read it from the server:
 example_deposit = deposit_context.get(example_deposit.id)
 
-# 6.3.3. Editing a Deposit.
+# 6.3.3. Editing a Deposit Job.
 
-# After saving the Deposit in the Storm WS, we can edit its
-# pipelines and service:
+# After saving the Deposit Job in the Storm WS, we can edit its
+# workflow and service:
 
 #  > Service
 example_deposit.service = "deposit-inveniordm"
 
-#  > Pipeline
-example_deposit.pipelines = [example_pipeline]  # or [ "<pipeline-id" ]
+#  > Workflow
+example_deposit.workflows = [example_workflow]  # or [ "<workflow-id" ]
 
 # After changes, we can save the modifications in the Storm WS:
 example_deposit = deposit_context.save(example_deposit)
@@ -413,61 +410,61 @@ print(example_deposit)
 
 # example_deposit.customizations = {"field_1": "..."}
 
-# 6.3.4. Start a deposit
+# 6.3.4. Start a deposit job
 
-# To start a deposit process, we can use:
+# To start a deposit job, we can use:
 # example_deposit = deposit_context.start_deposit(example_deposit)
 
-# (Other way to start a Deposit process)
+# (Other way to start a Deposit Job)
 # deposit_context.start_deposit("<deposit-id>")
 
-# 6.3.5. Cancel a deposit
+# 6.3.5. Cancel a deposit job
 
-# To cancel a started deposit process, we can use:
+# To cancel a started deposit, we can use:
 # example_deposit = deposit_context.cancel_deposit(example_deposit)
 
-# (Other way to cancel a Deposit process)
+# (Other way to cancel a Deposit Job)
 # deposit_context.cancel_deposit("<deposit-id>")
 
-# 6.3.6. Delete a Deposit (Optional).
+# 6.3.6. Delete a Deposit Job (Optional).
 
 # We can also delete the Deposit:
 # deposit_context.delete(example_deposit)
 
 #
-# 6.4. Accessing the Job Context.
+# 6.4. Accessing the Runner Context.
 #
 
-# To work with the jobs, we use the Job Context:
-job_context = project_context.job
+# To work with the tasks, we can use the Runner Context:
+runner_context = project_context.runner
 
-# In this context, we can search for available jobs:
-print(job_context.search())
+# In this context, we can search for available execution tasks:
+print(runner_context.search())
 
-# 6.4.1. Searching jobs services.
+# 6.4.1. Searching run services.
 
-# In the Storm WS, it is available multiple jobs services. Each
-# service is specialized to run the defined pipeline in a different
+# In the Storm WS, it is available multiple execution services. Each
+# service is specialized to run the defined workflow in a different
 # environment (e.g., REANA, o2r). To get the list of available services,
 # we can use the following context function:
-print(job_context.list_services())
+print(runner_context.list_services())
 
 # 6.4.2. Creating a Job.
 
-# To create a new Job in the Storm WS, first, we need
+# To create a new workflow execution in the Storm WS, first, we need
 # to create a Job object and populate it with metadata:
-job = Job(
-    pipeline_id=example_pipeline,  # here, we can also declare the pipeline using its ID.
-    service="job-reprozip-serial",  # name retrieved from the `list_services` method result.
+job = ExecutionJob(
+    workflow_id=example_workflow,  # here, we can also declare the workflow using its ID.
+    service="runner-reprozip-serial",  # name retrieved from the `list_services` method result.
 )
 
 # Checking the object properties
 
 #  > ID
-print(job.id)  # filled after saving the job in the service.
+print(job.id) # filled after saving the job in the service.
 
-#  > Associated pipeline
-print(job.pipeline_id)
+#  > Associated workflow
+print(job.workflow_id)
 
 #  > Associated project
 print(job.project_id)  # filled after saving the job in the service.
@@ -479,28 +476,28 @@ print(job.service)
 print(job.data)
 
 # With the local object created, let us save it in the Storm WS:
-example_job = job_context.create(job)
+example_job = runner_context.create(job)
 
 # We can check the created Job:
 print(example_job)
 
 # To confirm the Job creation in the Storm WS,
 # let us read it from the server:
-example_job = job_context.get(example_job.id)
+example_job = runner_context.get(example_job.id)
 
 # 6.4.3. Editing a Job.
 
 # After saving the Job in the Storm WS, we can edit its
-# associated pipeline and service:
+# associated workflow and service:
 
 #  > Service
-example_job.service = "job-reprozip-serial"
+example_job.service = "runner-reprozip-serial"
 
-#  > Pipeline
-example_job.pipeline_id = example_pipeline
+#  > Workflow
+example_job.workflow_id = example_workflow
 
 # After changes, we can save the modifications in the Storm WS:
-example_job = job_context.save(example_job)
+example_job = runner_context.save(example_job)
 print(example_job)
 
 # 6.4.4. Start a job
