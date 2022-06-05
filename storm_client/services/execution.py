@@ -12,15 +12,15 @@ from typeguard import typechecked
 
 from .base import RecordOperatorService
 from ..models.extractor import IDExtractor
-from ..models.runner.model import ExecutionJobList, ExecutionJob
+from ..models.execution.model import ExecutionJobList, ExecutionJob
 from ..object_factory import ObjectFactory
 
 
 @typechecked
-class RunnerService(RecordOperatorService):
-    """Deposit service."""
+class ExecutionService(RecordOperatorService):
+    """Execution service."""
 
-    base_path = "runs"
+    base_path = "executions"
     """Base service path in the Rest API."""
 
     @cached(cache=LRUCache(maxsize=128))

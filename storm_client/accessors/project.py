@@ -8,7 +8,7 @@
 from .base import BaseServiceContextAccessor
 from .compendium import CompendiumContextAccessor
 
-from ..services.runner import RunnerService
+from ..services.execution import ExecutionService
 from ..services.deposit import DepositJobService
 from ..services.workflow import WorkflowService
 
@@ -35,6 +35,6 @@ class ProjectContextAccessor(BaseServiceContextAccessor):
         return DepositJobService(self._url)
 
     @property
-    def runner(self):
-        """Runner context accessor."""
-        return RunnerService(self._url)
+    def execution(self):
+        """Execution context accessor."""
+        return ExecutionService(self._url)
